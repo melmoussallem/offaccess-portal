@@ -54,9 +54,7 @@ app.set('trust proxy', 1);
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? [process.env.FRONTEND_URL || 'https://yourdomain.com'] 
-    : ['http://localhost:3000'],
+  origin: true, // Allow all origins for now
   credentials: true
 }));
 
@@ -91,7 +89,7 @@ app.use('/api/chat', chatLimiter);
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Static file serving
+// Static file serving for uploads
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Database connection
@@ -131,15 +129,6 @@ app.use('/api/brands', brandRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/file-submission', fileSubmissionRoutes);
 app.use('/api/chat', chatRoutes);
-
-// Serve React build static files only if they exist (for local development)
-const clientBuildPath = path.join(__dirname, '../client/build');
-if (require('fs').existsSync(clientBuildPath)) {
-  app.use(express.static(clientBuildPath, { maxAge: '1y' }));
-  console.log('Serving React build files from:', clientBuildPath);
-} else {
-  console.log('React build files not found, skipping static file serving');
-}
 
 // Health check endpoint (must come before debug route)
 app.get('/api/health', (req, res) => {
