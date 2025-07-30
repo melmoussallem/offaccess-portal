@@ -6,7 +6,7 @@ import toast from 'react-hot-toast';
 let loginInProgress = false;
 
 // Configure axios with proper base URL
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_BASE_URL = 'https://offaccess-portal-production.up.railway.app';
 console.log('🔍 AuthContext - API_BASE_URL:', API_BASE_URL);
 axios.defaults.baseURL = API_BASE_URL;
 

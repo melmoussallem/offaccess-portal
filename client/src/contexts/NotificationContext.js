@@ -31,7 +31,7 @@ export const NotificationProvider = ({ children }) => {
     if (!user) return;
     try {
       setLoading(true);
-      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      const apiUrl = 'https://offaccess-portal-production.up.railway.app';
       console.log('🔍 NotificationContext - API URL:', apiUrl);
       const response = await fetch(`${apiUrl}/api/notifications?page=${page}&limit=${limit}`, {
         headers: {
