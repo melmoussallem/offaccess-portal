@@ -141,6 +141,11 @@ if (require('fs').existsSync(clientBuildPath)) {
   console.log('React build files not found, skipping static file serving');
 }
 
+// Health check endpoint (must come before debug route)
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
+
 // Debug route to log unmatched requests
 app.use('/api/*', (req, res, next) => {
   console.log('=== DEBUG: Unmatched API request ===');
@@ -151,11 +156,6 @@ app.use('/api/*', (req, res, next) => {
   console.log('Base URL:', req.baseUrl);
   console.log('==============================');
   next();
-});
-
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
 // Error handling middleware
