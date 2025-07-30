@@ -31,7 +31,9 @@ export const NotificationProvider = ({ children }) => {
     if (!user) return;
     try {
       setLoading(true);
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/notifications?page=${page}&limit=${limit}`, {
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      console.log('🔍 NotificationContext - API URL:', apiUrl);
+      const response = await fetch(`${apiUrl}/api/notifications?page=${page}&limit=${limit}`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
