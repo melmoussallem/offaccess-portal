@@ -132,7 +132,22 @@ app.use('/api/chat', chatRoutes);
 
 // Health check endpoint (must come before debug route)
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+  console.log('Health check requested');
+  try {
+    res.status(200).json({ 
+      status: 'OK', 
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      port: process.env.PORT || 5000
+    });
+  } catch (error) {
+    console.error('Health check error:', error);
+    res.status(500).json({ 
+      status: 'ERROR', 
+      message: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // Debug route to log unmatched requests
@@ -167,6 +182,7 @@ function startServer(port) {
     console.log(`Server running on port ${port}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   });
+  
   server.on('error', (err) => {
     if (err.code === 'EADDRINUSE') {
       console.error(`Port ${port} is in use. Exiting.`);
@@ -175,6 +191,25 @@ function startServer(port) {
       throw err;
     }
   });
+
+  // Handle graceful shutdown
+  process.on('SIGTERM', () => {
+    console.log('Received SIGTERM, shutting down gracefully...');
+    server.close(() => {
+      console.log('Server closed');
+      process.exit(0);
+    });
+  });
+
+  process.on('SIGINT', () => {
+    console.log('Received SIGINT, shutting down gracefully...');
+    server.close(() => {
+      console.log('Server closed');
+      process.exit(0);
+    });
+  });
+
+  return server;
 }
 
 startServer(DEFAULT_PORT); 
