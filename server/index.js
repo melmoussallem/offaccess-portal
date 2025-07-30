@@ -113,8 +113,14 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/file-submission', fileSubmissionRoutes);
 app.use('/api/chat', chatRoutes);
 
-// Serve React build static files with long cache headers
-app.use(express.static(path.join(__dirname, '../client/build'), { maxAge: '1y' }));
+// Serve React build static files only if they exist (for local development)
+const clientBuildPath = path.join(__dirname, '../client/build');
+if (require('fs').existsSync(clientBuildPath)) {
+  app.use(express.static(clientBuildPath, { maxAge: '1y' }));
+  console.log('Serving React build files from:', clientBuildPath);
+} else {
+  console.log('React build files not found, skipping static file serving');
+}
 
 // Debug route to log unmatched requests
 app.use('/api/*', (req, res, next) => {
