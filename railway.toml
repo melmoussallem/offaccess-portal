@@ -10,16 +10,4 @@ restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 
 [environments.production.variables]
-NODE_ENV = "production"
-
-[build.ignore]
-- "client/"
-- "client/*"
-- "build/"
-- "dist/"
-- "src/"
-- "public/"
-- "*.html"
-- "*.css"
-- "*.jsx"
-- "*.tsx" 
+NODE_ENV = "production" 
