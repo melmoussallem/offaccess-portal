@@ -1,4 +1,4 @@
-# Ignore frontend files for Railway backend deployment
+# Completely ignore frontend for Railway backend deployment
 client/
 client/*
 client/src/
@@ -6,6 +6,8 @@ client/public/
 client/package.json
 client/package-lock.json
 client/node_modules/
+client/build/
+client/dist/
 
 # Ignore frontend build files
 build/
@@ -26,4 +28,26 @@ google-drive-key.json
 # Ignore deployment files for other platforms
 vercel.json
 vercel-env.txt
-railway-env.txt 
+railway-env.txt
+
+# Ignore React and frontend dependencies
+react/
+react-dom/
+@mui/
+@emotion/
+react-scripts/
+webpack/
+babel/
+
+# Ignore frontend build tools
+webpack.config.js
+babel.config.js
+.eslintrc.js
+.prettierrc
+
+# Ignore frontend source files
+src/
+public/
+index.html
+favicon.ico
+manifest.json 
