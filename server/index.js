@@ -163,7 +163,7 @@ app.use('*', (req, res) => {
 
 function startServer(port) {
   const server = http.createServer(app);
-  server.listen(port, () => {
+  server.listen(port, '0.0.0.0', () => {
     console.log(`Server running on port ${port}`);
     console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
   });
