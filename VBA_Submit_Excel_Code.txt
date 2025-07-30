@@ -1,0 +1,259 @@
+' =====================================================
+' VBA MACRO CODE FOR EXCEL FILE SUBMISSION (CLEAN VERSION)
+' =====================================================
+' 
+' IMPORTANT: Excel File Requirements
+' =====================================================
+' Your Excel file MUST contain the following data in specific cells:
+' 
+' Cell X1 → Total Quantity Ordered (numeric value)
+' Cell X2 → Total Order Amount ($) (numeric value)
+' 
+' Example:
+' - X1: 150 (total quantity)
+' - X2: 2500.50 (total amount in dollars)
+' 
+' The system will automatically extract these values when you submit the file.
+' If these cells are missing or contain non-numeric values, the totals will default to 0.
+' 
+' Instructions:
+' 1. Open your Excel file
+' 2. Press Alt + F11 to open VBA Editor
+' 3. Insert a new module (Insert > Module)
+' 4. Copy and paste this code into the module
+' 5. Save the Excel file as .xlsm (Excel Macro-Enabled Workbook)
+' 6. Add a button to your Excel sheet and assign this macro to it
+'
+' =====================================================
+
+Option Explicit
+
+' API Configuration
+Private Const API_URL As String = "http://localhost:5000/api/file-submission/submit-excel"
+Private Const CONTENT_TYPE As String = "application/json"
+
+Sub SubmitExcelFile()
+    ' This is the main macro to submit the Excel file
+    On Error GoTo ErrorHandler
+    
+    Dim base64Data As String
+    Dim fileName As String
+    Dim response As String
+    
+    ' Get the current workbook name
+    fileName = ThisWorkbook.Name
+    
+    ' Convert workbook to base64
+    base64Data = ConvertWorkbookToBase64()
+    
+    If base64Data = "" Then
+        MsgBox "Failed to convert workbook to base64", vbCritical
+        Exit Sub
+    End If
+    
+    ' Create the request payload
+    Dim payload As String
+    payload = CreateRequestPayload(base64Data, fileName)
+    
+    ' Submit the file
+    response = SubmitFile(payload)
+    
+    ' Show result
+    If InStr(response, "success") > 0 And InStr(response, "true") > 0 Then
+        MsgBox "File submitted successfully!", vbInformation
+    Else
+        MsgBox "Error submitting file." & vbCrLf & "Response: " & response, vbCritical
+    End If
+    
+    Exit Sub
+
+ErrorHandler:
+    MsgBox "Error: " & Err.Description, vbCritical
+End Sub
+
+Function ConvertWorkbookToBase64() As String
+    ' Convert the entire workbook to base64 using XML method
+    On Error GoTo ErrorHandler
+    
+    Dim tempPath As String
+    Dim xmlDoc As Object
+    Dim base64Data As String
+    
+    ' Create temporary file path
+    tempPath = Environ$("TEMP") & "\temp_workbook.xlsx"
+    
+    ' Save current workbook to temp location
+    ThisWorkbook.SaveCopyAs tempPath
+    
+    ' Read file as binary and convert to base64
+    Dim fileNum As Integer
+    Dim fileData() As Byte
+    
+    fileNum = FreeFile
+    Open tempPath For Binary As fileNum
+    ReDim fileData(LOF(fileNum) - 1)
+    Get fileNum, , fileData
+    Close fileNum
+    
+    ' Convert to base64
+    base64Data = EncodeBase64(fileData)
+    
+    ' Clean up temp file
+    Kill tempPath
+    
+    ConvertWorkbookToBase64 = base64Data
+    Exit Function
+
+ErrorHandler:
+    ConvertWorkbookToBase64 = ""
+End Function
+
+Function EncodeBase64(bytes() As Byte) As String
+    ' Simple base64 encoding using XML
+    On Error GoTo ErrorHandler
+    
+    Dim xmlDoc As Object
+    Dim xmlNode As Object
+    
+    Set xmlDoc = CreateObject("MSXML2.DOMDocument")
+    Set xmlNode = xmlDoc.createElement("temp")
+    
+    xmlNode.DataType = "bin.base64"
+    xmlNode.nodeTypedValue = bytes
+    
+    EncodeBase64 = xmlNode.Text
+    Exit Function
+
+ErrorHandler:
+    EncodeBase64 = ""
+End Function
+
+Function CreateRequestPayload(base64Data As String, fileName As String) As String
+    ' Create the JSON payload for the API request
+    Dim payload As String
+    
+    ' Escape special characters in strings
+    Dim escapedFileName As String
+    Dim escapedBase64 As String
+    
+    escapedFileName = EscapeJsonString(fileName)
+    escapedBase64 = EscapeJsonString(base64Data)
+    
+    ' Create the payload with proper data URL format
+    payload = "{"
+    payload = payload & """fileData"":""data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64," & escapedBase64 & ""","
+    payload = payload & """fileName"":""" & escapedFileName & ""","
+    payload = payload & """brandName"":""Test Brand"","
+    payload = payload & """catalogueFileId"":""test-catalogue-123"""
+    payload = payload & "}"
+    
+    CreateRequestPayload = payload
+End Function
+
+Function EscapeJsonString(str As String) As String
+    ' Escape special characters for JSON
+    Dim result As String
+    result = str
+    
+    ' Replace backslashes first
+    result = Replace(result, "\", "\\")
+    
+    ' Replace quotes
+    result = Replace(result, """", "\""")
+    
+    ' Replace control characters
+    result = Replace(result, vbCrLf, "\n")
+    result = Replace(result, vbCr, "\r")
+    result = Replace(result, vbTab, "\t")
+    result = Replace(result, vbLf, "\n")
+    
+    ' Replace other problematic characters
+    result = Replace(result, Chr(8), "\b")
+    result = Replace(result, Chr(12), "\f")
+    
+    EscapeJsonString = result
+End Function
+
+Function SubmitFile(payload As String) As String
+    ' Submit the file to the API
+    On Error GoTo ErrorHandler
+    
+    Dim httpRequest As Object
+    Dim response As String
+    
+    Set httpRequest = CreateObject("MSXML2.XMLHTTP")
+    
+    ' Configure the request
+    httpRequest.Open "POST", API_URL, False
+    httpRequest.setRequestHeader "Content-Type", CONTENT_TYPE
+    httpRequest.setRequestHeader "Content-Length", Len(payload)
+    
+    ' Send the request
+    httpRequest.send payload
+    
+    ' Get the response
+    response = httpRequest.responseText
+    
+    SubmitFile = response
+    Exit Function
+
+ErrorHandler:
+    SubmitFile = "Error: " & Err.Description
+End Function
+
+' =====================================================
+' SIMPLIFIED VERSION FOR TESTING
+' =====================================================
+
+Sub SubmitExcelFileSimple()
+    ' Simplified version for testing
+    On Error GoTo ErrorHandler
+    
+    Dim base64Data As String
+    Dim fileName As String
+    Dim payload As String
+    Dim response As String
+    
+    ' Get file name
+    fileName = ThisWorkbook.Name
+    
+    ' Convert to base64
+    base64Data = ConvertWorkbookToBase64()
+    
+    If base64Data = "" Then
+        MsgBox "Failed to convert file", vbCritical
+        Exit Sub
+    End If
+    
+    ' Create simple payload
+    payload = "{"
+    payload = payload & """fileData"":""data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64," & base64Data & ""","
+    payload = payload & """fileName"":""" & fileName & ""","
+    payload = payload & """brandName"":""Test Brand"","
+    payload = payload & """catalogueFileId"":""test-123"""
+    payload = payload & "}"
+    
+    ' Submit
+    response = SubmitFile(payload)
+    
+    ' Show result
+    MsgBox "Response: " & response, vbInformation
+    
+    Exit Sub
+
+ErrorHandler:
+    MsgBox "Error: " & Err.Description, vbCritical
+End Sub
+
+' =====================================================
+' NOTES:
+' =====================================================
+' 
+' 1. Make sure your backend server is running on localhost:5000
+' 2. The API expects the fileData to start with "data:" (data URL format)
+' 3. You can customize the brandName and catalogueFileId as needed
+' 4. The simplified version (SubmitExcelFileSimple) is easier for testing
+' 5. Save your Excel file as .xlsm (Excel Macro-Enabled Workbook)
+' 6. Add a button to your sheet and assign one of these macros to it
+'
+' ===================================================== 

@@ -1,0 +1,266 @@
+' =====================================================
+' VBA MACRO CODE FOR EXCEL FILE SUBMISSION
+' =====================================================
+' 
+' Instructions:
+' 1. Open your Excel file
+' 2. Press Alt + F11 to open VBA Editor
+' 3. Insert a new module (Insert > Module)
+' 4. Copy and paste this code into the module
+' 5. Save the Excel file as .xlsm (Excel Macro-Enabled Workbook)
+' 6. Add a button to your Excel sheet and assign this macro to it
+'
+' =====================================================
+
+Option Explicit
+
+' API Configuration
+Private Const API_URL As String = "http://localhost:5000/api/file-submission/submit-excel"
+Private Const CONTENT_TYPE As String = "application/json"
+
+Sub SubmitExcelFile()
+    ' This is the main macro that will be called when the button is clicked
+    
+    On Error GoTo ErrorHandler
+    
+    ' Show progress message
+    Application.StatusBar = "Preparing to submit Excel file..."
+    DoEvents
+    
+    ' Get the current workbook
+    Dim wb As Workbook
+    Set wb = ThisWorkbook
+    
+    ' Convert the entire workbook to base64
+    Dim fileData As String
+    fileData = ConvertWorkbookToBase64(wb)
+    
+    ' Get file information
+    Dim fileName As String
+    fileName = wb.Name
+    
+    ' Create the request payload
+    Dim requestData As String
+    requestData = CreateRequestPayload(fileData, fileName)
+    
+    ' Submit the file
+    Dim response As String
+    response = SubmitToAPI(requestData)
+    
+    ' Handle the response
+    HandleResponse(response)
+    
+    ' Clean up
+    Application.StatusBar = False
+    Exit Sub
+    
+ErrorHandler:
+    Application.StatusBar = False
+    MsgBox "Error submitting file: " & Err.Description, vbCritical, "Submission Error"
+End Sub
+
+Function ConvertWorkbookToBase64(wb As Workbook) As String
+    ' Convert the entire workbook to base64 string
+    
+    Dim tempPath As String
+    Dim fileNum As Integer
+    
+    ' Create a temporary file path
+    tempPath = Environ$("TEMP") & "\" & "temp_submission_" & Format(Now, "yyyymmdd_hhnnss") & ".xlsx"
+    
+    ' Save the workbook as a temporary file
+    wb.SaveCopyAs tempPath
+    
+    ' Read the file and convert to base64
+    fileNum = FreeFile
+    Open tempPath For Binary As fileNum
+    
+    Dim fileBytes() As Byte
+    ReDim fileBytes(LOF(fileNum) - 1)
+    Get fileNum, , fileBytes
+    Close fileNum
+    
+    ' Convert to base64
+    ConvertWorkbookToBase64 = ConvertToBase64(fileBytes)
+    
+    ' Clean up temporary file
+    Kill tempPath
+End Function
+
+Function ConvertToBase64(bytes() As Byte) As String
+    ' Convert byte array to base64 string
+    
+    Dim xmlDoc As Object
+    Set xmlDoc = CreateObject("MSXML2.DOMDocument")
+    
+    Dim element As Object
+    Set element = xmlDoc.createElement("tmp")
+    element.DataType = "bin.base64"
+    element.nodeTypedValue = bytes
+    
+    ConvertToBase64 = element.Text
+End Function
+
+Function CreateRequestPayload(fileData As String, fileName As String) As String
+    ' Create the JSON payload for the API request
+    
+    ' You can customize these values based on your needs
+    Dim brandName As String
+    brandName = "Sample Brand"  ' Change this to your actual brand name
+    
+    Dim catalogueFileId As String
+    catalogueFileId = "sample-catalogue-id"  ' Change this if you have a specific catalogue ID
+    
+    ' Create JSON payload
+    Dim json As String
+    json = "{"
+    json = json & """fileData"":""" & fileData & ""","
+    json = json & """fileName"":""" & fileName & ""","
+    json = json & """brandName"":""" & brandName & ""","
+    json = json & """catalogueFileId"":""" & catalogueFileId & """"
+    json = json & "}"
+    
+    CreateRequestPayload = json
+End Function
+
+Function SubmitToAPI(requestData As String) As String
+    ' Submit the data to the API endpoint
+    
+    Dim httpRequest As Object
+    Set httpRequest = CreateObject("MSXML2.XMLHTTP")
+    
+    ' Configure the request
+    With httpRequest
+        .Open "POST", API_URL, False
+        .setRequestHeader "Content-Type", CONTENT_TYPE
+        .setRequestHeader "Accept", "application/json"
+        
+        ' Send the request
+        .send requestData
+        
+        ' Get the response
+        SubmitToAPI = .responseText
+    End With
+    
+    Set httpRequest = Nothing
+End Function
+
+Sub HandleResponse(response As String)
+    ' Handle the API response
+    
+    ' Simple response parsing (you can enhance this)
+    If InStr(response, """success"":true") > 0 Then
+        MsgBox "File submitted successfully!" & vbCrLf & vbCrLf & "Response: " & response, vbInformation, "Success"
+    Else
+        MsgBox "Error submitting file." & vbCrLf & vbCrLf & "Response: " & response, vbCritical, "Error"
+    End If
+End Sub
+
+' =====================================================
+' ALTERNATIVE SIMPLIFIED VERSION (if the above doesn't work)
+' =====================================================
+
+Sub SubmitExcelFileSimple()
+    ' Simplified version for testing
+    
+    On Error GoTo ErrorHandler
+    
+    Application.StatusBar = "Submitting Excel file..."
+    DoEvents
+    
+    ' Get current workbook
+    Dim wb As Workbook
+    Set wb = ThisWorkbook
+    
+    ' Save to temporary file
+    Dim tempPath As String
+    tempPath = Environ$("TEMP") & "\temp_submission.xlsx"
+    wb.SaveCopyAs tempPath
+    
+    ' Read file as base64
+    Dim fileData As String
+    fileData = FileToBase64(tempPath)
+    
+    ' Create simple payload
+    Dim payload As String
+    payload = "{""fileData"":""" & fileData & """,""fileName"":""" & wb.Name & """,""brandName"":""Test Brand"",""catalogueFileId"":""test-id""}"
+    
+    ' Submit
+    Dim http As Object
+    Set http = CreateObject("MSXML2.XMLHTTP")
+    
+    http.Open "POST", API_URL, False
+    http.setRequestHeader "Content-Type", "application/json"
+    http.send payload
+    
+    ' Show result
+    If http.Status = 200 Then
+        MsgBox "Success! Response: " & http.responseText, vbInformation
+    Else
+        MsgBox "Error! Status: " & http.Status & " Response: " & http.responseText, vbCritical
+    End If
+    
+    ' Clean up
+    Kill tempPath
+    Application.StatusBar = False
+    Exit Sub
+    
+ErrorHandler:
+    Application.StatusBar = False
+    MsgBox "Error: " & Err.Description, vbCritical
+End Sub
+
+Function FileToBase64(filePath As String) As String
+    ' Read file and convert to base64
+    
+    Dim fileNum As Integer
+    fileNum = FreeFile
+    
+    Open filePath For Binary As fileNum
+    Dim fileBytes() As Byte
+    ReDim fileBytes(LOF(fileNum) - 1)
+    Get fileNum, , fileBytes
+    Close fileNum
+    
+    ' Convert to base64 using ADODB.Stream
+    Dim stream As Object
+    Set stream = CreateObject("ADODB.Stream")
+    
+    stream.Type = 1 ' Binary
+    stream.Open
+    stream.Write fileBytes
+    
+    stream.Position = 0
+    stream.Type = 2 ' Text
+    stream.CharSet = "us-ascii"
+    
+    FileToBase64 = stream.ReadText
+    
+    stream.Close
+    Set stream = Nothing
+End Function
+
+' =====================================================
+' HOW TO SET UP THE BUTTON IN EXCEL
+' =====================================================
+'
+' 1. In your Excel sheet, go to Developer tab
+' 2. Click "Insert" and choose "Button" (Form Control)
+' 3. Draw the button on your sheet
+' 4. When prompted, select "SubmitExcelFile" macro
+' 5. Right-click the button and select "Edit Text" to change the button text
+' 6. Right-click the button and select "Format Control" to style it
+'
+' =====================================================
+' IMPORTANT NOTES
+' =====================================================
+'
+' 1. Make sure your backend server is running on localhost:5000
+' 2. The Excel file must be saved as .xlsm (macro-enabled)
+' 3. Enable macros in Excel (File > Options > Trust Center > Trust Center Settings > Macro Settings)
+' 4. If you get security warnings, you may need to add the backend URL to trusted sites
+' 5. The macro will create a temporary file during submission, which is automatically deleted
+' 6. Customize the brandName and catalogueFileId in the CreateRequestPayload function
+' 7. The response will show if the submission was successful and include the order number
+'
+' ===================================================== 
