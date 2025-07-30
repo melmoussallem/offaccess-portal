@@ -8,6 +8,25 @@ const http = require('http');
 const compression = require('compression');
 require('dotenv').config();
 
+// Environment variable checks for Railway deployment
+console.log('🚀 Starting server...');
+console.log('Environment:', process.env.NODE_ENV || 'development');
+console.log('Port:', process.env.PORT || 5000);
+
+if (!process.env.MONGODB_URI) {
+  console.error('❌ MONGODB_URI environment variable is not set!');
+  console.error('Please set MONGODB_URI in Railway environment variables.');
+  process.exit(1);
+}
+
+if (!process.env.JWT_SECRET) {
+  console.error('❌ JWT_SECRET environment variable is not set!');
+  console.error('Please set JWT_SECRET in Railway environment variables.');
+  process.exit(1);
+}
+
+console.log('✅ Environment variables check passed');
+
 const authRoutes = require('./routes/auth');
 const buyerRoutes = require('./routes/buyers');
 const catalogueRoutes = require('./routes/catalogue');
