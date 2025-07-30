@@ -13,6 +13,7 @@ yarn-error.log*
 
 # Google Drive credentials
 google-drive-key.json
+google-sheets-key.json
 *.json.key
 
 # Build outputs
