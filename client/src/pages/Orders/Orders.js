@@ -155,7 +155,7 @@ const Orders = () => {
   const loadOrders = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/orders', {
+      const response = await fetch('https://offaccess-portal-production.up.railway.app/api/orders', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -179,7 +179,7 @@ const Orders = () => {
       setLoadingBrands(true);
       if (user?.role === 'admin') {
         // For admins, fetch all brands
-        const brandsResponse = await fetch('/api/brands', {
+        const brandsResponse = await fetch('https://offaccess-portal-production.up.railway.app/api/brands', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -194,7 +194,7 @@ const Orders = () => {
         }
       } else {
         // For buyers, fetch accessible brands using the same endpoint as Catalogue
-        const brandsResponse = await fetch('/api/catalogue/brands/accessible', {
+        const brandsResponse = await fetch('https://offaccess-portal-production.up.railway.app/api/catalogue/brands/accessible', {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -226,7 +226,7 @@ const Orders = () => {
     
     try {
       setLoadingBuyers(true);
-      const response = await fetch('/api/buyers?status=approved&limit=1000', {
+      const response = await fetch('https://offaccess-portal-production.up.railway.app/api/buyers?status=approved&limit=1000', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -412,7 +412,7 @@ const Orders = () => {
         formData.append('buyerId', selectedBuyer);
       }
 
-      const response = await fetch('/api/orders', {
+      const response = await fetch('https://offaccess-portal-production.up.railway.app/api/orders', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

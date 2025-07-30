@@ -61,7 +61,7 @@ const Dashboard = () => {
       setLoading(true);
       const token = localStorage.getItem('token');
       
-      const response = await fetch('/api/dashboard', {
+      const response = await fetch('https://offaccess-portal-production.up.railway.app/api/dashboard', {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
