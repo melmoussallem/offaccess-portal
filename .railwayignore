@@ -1,4 +1,4 @@
-# Completely ignore frontend for Railway backend deployment
+# Ignore frontend files for Railway backend deployment
 client/
 client/*
 client/src/
@@ -7,7 +7,6 @@ client/package.json
 client/package-lock.json
 client/node_modules/
 client/build/
-client/dist/
 
 # Ignore frontend build files
 build/
@@ -50,4 +49,13 @@ src/
 public/
 index.html
 favicon.ico
-manifest.json 
+manifest.json
+
+# Ignore test files
+*.test.js
+*.spec.js
+test-*.js
+debug-*.js
+fix-*.js
+create-*.js
+check-*.js 
