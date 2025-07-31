@@ -46,7 +46,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link } from 'react-router-dom';
-import { getApiUrl } from '../config/api';
+import { getApiUrl } from '../../config/api';
 
 // AED currency formatter with specified format
 const formatAED = (amount) => {
