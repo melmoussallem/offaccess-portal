@@ -674,29 +674,29 @@ export default function Catalogue() {
       setShowMessage(true);
       return;
     }
-    
+
     try {
       setUpdatingGoogleSheet(true);
-      const response = await fetch(`/api/catalogue/${selectedBrand._id}/stock-file/${selectedFileForGoogleSheet._id}/google-sheet`, {
+      const response = await fetch(`https://offaccess-portal-production.up.railway.app/api/catalogue/${selectedBrand._id}/stock-file/${selectedFileForGoogleSheet._id}/google-sheet`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${localStorage.getItem('token')}`,
+          'Content-Type': 'application/json'
         },
         body: JSON.stringify({ googleSheetUrl: googleSheetUrl.trim() })
       });
-      
+
       if (!response.ok) throw new Error('Failed to update Google Sheet URL');
-      
+
       setMessage('Google Sheet URL updated successfully');
       setSeverity('success');
       setShowMessage(true);
       closeDialog(setShowGoogleSheetDialog);
       setSelectedFileForGoogleSheet(null);
       setGoogleSheetUrl('');
-      if (selectedBrand) {
-        loadStockFiles(selectedBrand); // Refresh the stock files list
-      }
+      
+      // Refresh the stock files to show the updated data
+      await loadStockFiles(selectedBrand);
     } catch (error) {
       console.error('Error updating Google Sheet URL:', error);
       setMessage('Failed to update Google Sheet URL');
