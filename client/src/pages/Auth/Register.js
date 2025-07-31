@@ -500,7 +500,7 @@ const Register = () => {
   const passwordStrength = getPasswordStrength(watch('password'));
 
   // Fix regex pattern to remove unnecessary escape characters
-  const phoneRegex = /^[+]?[0-9\s\-()]{10,}$/;
+  const phoneRegex = /^[+]?[0-9\s\-()]{7,}$/;
 
   // Function to check if a field has an error (show errors immediately for better UX)
   const hasFieldError = (fieldName, value) => {
@@ -860,8 +860,8 @@ const Register = () => {
                           required: 'Phone number is required',
                           pattern: phoneRegex,
                           minLength: {
-                            value: 10,
-                            message: 'Phone number must be at least 10 digits'
+                            value: 7,
+                            message: 'Phone number must be at least 7 digits'
                           }
                         })}
                         fullWidth
