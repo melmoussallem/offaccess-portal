@@ -157,6 +157,7 @@ const Orders = () => {
   // Load orders
   const loadOrders = useCallback(async () => {
     try {
+      console.log('📋 Loading orders...');
       setLoading(true);
       const response = await fetch(getApiUrl('api/orders'), {
         headers: {
@@ -166,10 +167,12 @@ const Orders = () => {
       
       if (!response.ok) throw new Error('Failed to load orders');
       
-      // eslint-disable-next-line no-unused-vars
       const data = await response.json();
+      console.log('📋 Orders loaded:', data.length, 'orders');
+      console.log('📋 First order status:', data[0]?.status);
       setOrders(data);
     } catch (err) {
+      console.error('❌ Error loading orders:', err.message);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -506,6 +509,8 @@ const Orders = () => {
       console.log('✅ Approval request successful');
       const responseData = await response.json();
       console.log('Response data:', responseData);
+      console.log('📊 Approved order status:', responseData.status);
+      console.log('📊 Approved order inventory status:', responseData.inventoryStatus);
 
       await loadOrders();
       handleCloseDialog();
@@ -661,6 +666,7 @@ const Orders = () => {
   };
 
   const handleCloseDialog = () => {
+    console.log('🚪 Closing dialog...');
     setDialogOpen(false);
     setSelectedOrder(null);
     setSelectedBrand('');
