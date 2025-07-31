@@ -20,7 +20,6 @@ dist/
 .env.production.local
 
 # Ignore sensitive files
-google-sheets-key.json
 google-drive-key.json
 *.json.key
 
