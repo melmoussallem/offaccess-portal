@@ -501,6 +501,7 @@ router.put('/:id/approve', auth, upload.single('invoiceFile'), async (req, res) 
     try {
       console.log(`Processing inventory deduction for order ${order.orderNumber}`);
       console.log(`Brand: ${order.brand}, Collection: ${order.stockFile}`);
+      console.log(`Google Sheets service status - Auth: ${!!googleSheetsService.auth}, Drive: ${!!googleSheetsService.drive}`);
       
       // Set inventory status to pending
       order.inventoryStatus = 'pending';
@@ -511,6 +512,7 @@ router.put('/:id/approve', auth, upload.single('invoiceFile'), async (req, res) 
       // Check if Google Sheets service is available
       if (!googleSheetsService.drive) {
         console.warn('Google Sheets service not initialized - skipping inventory deduction');
+        console.warn('Service account file path check needed');
         inventoryResult = { 
           success: false, 
           message: 'Google Sheets service not available - inventory deduction skipped',
@@ -520,6 +522,7 @@ router.put('/:id/approve', auth, upload.single('invoiceFile'), async (req, res) 
         order.inventoryError = 'Google Sheets service not configured';
         await order.save();
       } else {
+        console.log('Google Sheets service is available, proceeding with inventory deduction');
         // Process inventory deduction using Google Sheets (searches for file by collection name)
         inventoryResult = await googleSheetsService.processInventoryDeduction(order, { name: order.stockFile });
         

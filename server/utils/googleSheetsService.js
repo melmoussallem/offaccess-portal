@@ -14,48 +14,56 @@ class GoogleSheetsService {
   // Initialize authentication using service account
   initializeAuth() {
     try {
+      console.log('🔧 Initializing Google Sheets service...');
+      console.log('🔧 Current working directory:', process.cwd());
+      console.log('🔧 NODE_ENV:', process.env.NODE_ENV);
+      console.log('🔧 GOOGLE_DRIVE_KEY_FILE:', process.env.GOOGLE_DRIVE_KEY_FILE);
+      
       let credentials;
       
       // Check if GOOGLE_DRIVE_KEY_FILE environment variable is set
       if (process.env.GOOGLE_DRIVE_KEY_FILE) {
         const serviceAccountPath = process.env.GOOGLE_DRIVE_KEY_FILE;
-        console.log('Using Google Drive key file from environment variable:', serviceAccountPath);
+        console.log('🔧 Using Google Drive key file from environment variable:', serviceAccountPath);
         
         if (fs.existsSync(serviceAccountPath)) {
+          console.log('✅ Service account file exists at environment path');
           credentials = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
         } else {
-          console.warn('Google Drive key file not found at environment path:', serviceAccountPath);
+          console.warn('❌ Google Drive key file not found at environment path:', serviceAccountPath);
         }
       }
       
       // If no credentials from environment, try default path
       if (!credentials) {
         const defaultPath = path.join(__dirname, '..', '..', 'google-sheets-key.json');
-        console.log('Using default Google Drive key file path:', defaultPath);
+        console.log('🔧 Using default Google Drive key file path:', defaultPath);
         
         if (fs.existsSync(defaultPath)) {
+          console.log('✅ Service account file exists at default path');
           credentials = JSON.parse(fs.readFileSync(defaultPath, 'utf8'));
         } else {
-          console.warn('Google Sheets service account file not found:', defaultPath);
+          console.warn('❌ Google Sheets service account file not found:', defaultPath);
         }
       }
       
       // Check if GOOGLE_SERVICE_ACCOUNT_CREDENTIALS environment variable is set (JSON string)
       if (!credentials && process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS) {
         try {
-          console.log('Using Google service account credentials from environment variable');
+          console.log('🔧 Using Google service account credentials from environment variable');
           credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS);
         } catch (error) {
-          console.error('Failed to parse GOOGLE_SERVICE_ACCOUNT_CREDENTIALS:', error.message);
+          console.error('❌ Failed to parse GOOGLE_SERVICE_ACCOUNT_CREDENTIALS:', error.message);
         }
       }
       
       if (!credentials) {
-        console.warn('Google Sheets service account credentials not found. Google Sheets functionality will be disabled.');
-        console.warn('Set GOOGLE_DRIVE_KEY_FILE environment variable, GOOGLE_SERVICE_ACCOUNT_CREDENTIALS environment variable, or ensure google-sheets-key.json exists.');
+        console.warn('❌ Google Sheets service account credentials not found. Google Sheets functionality will be disabled.');
+        console.warn('🔧 Set GOOGLE_DRIVE_KEY_FILE environment variable, GOOGLE_SERVICE_ACCOUNT_CREDENTIALS environment variable, or ensure google-sheets-key.json exists.');
         return;
       }
 
+      console.log('🔧 Creating Google Auth with credentials...');
       this.auth = new google.auth.GoogleAuth({
         credentials: credentials,
         scopes: [
@@ -64,12 +72,19 @@ class GoogleSheetsService {
         ]
       });
 
+      console.log('🔧 Creating Google Sheets API client...');
       this.sheets = google.sheets({ version: 'v4', auth: this.auth });
+      
+      console.log('🔧 Creating Google Drive API client...');
       this.drive = google.drive({ version: 'v3', auth: this.auth });
+      
       console.log('✅ Google Sheets service initialized with service account');
+      console.log('✅ Auth initialized:', !!this.auth);
+      console.log('✅ Sheets initialized:', !!this.sheets);
+      console.log('✅ Drive initialized:', !!this.drive);
     } catch (error) {
       console.error('❌ Failed to initialize Google Sheets service:', error.message);
-      console.error('Google Sheets functionality will be disabled. Please check your service account configuration.');
+      console.error('❌ Google Sheets functionality will be disabled. Please check your service account configuration.');
     }
   }
 
