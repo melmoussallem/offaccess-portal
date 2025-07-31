@@ -46,6 +46,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import { Link } from 'react-router-dom';
+import { getApiUrl } from '../config/api';
 
 // AED currency formatter with specified format
 const formatAED = (amount) => {
@@ -155,7 +156,7 @@ const Orders = () => {
   const loadOrders = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch('https://offaccess-portal-production.up.railway.app/api/orders', {
+      const response = await fetch(getApiUrl('api/orders'), {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -179,7 +180,7 @@ const Orders = () => {
       setLoadingBrands(true);
       if (user?.role === 'admin') {
         // For admins, fetch all brands
-        const brandsResponse = await fetch('https://offaccess-portal-production.up.railway.app/api/brands', {
+        const brandsResponse = await fetch(getApiUrl('api/brands'), {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -194,7 +195,7 @@ const Orders = () => {
         }
       } else {
         // For buyers, fetch accessible brands using the same endpoint as Catalogue
-        const brandsResponse = await fetch('https://offaccess-portal-production.up.railway.app/api/catalogue/brands/accessible', {
+        const brandsResponse = await fetch(getApiUrl('api/catalogue/brands/accessible'), {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -226,7 +227,7 @@ const Orders = () => {
     
     try {
       setLoadingBuyers(true);
-      const response = await fetch('https://offaccess-portal-production.up.railway.app/api/buyers?status=approved&limit=1000', {
+      const response = await fetch(getApiUrl('api/buyers?status=approved&limit=1000'), {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -252,7 +253,7 @@ const Orders = () => {
     if (!isAdmin) return;
     
     try {
-      const response = await fetch(`/api/orders/${orderId}/inventory-status`, {
+      const response = await fetch(getApiUrl(`api/orders/${orderId}/inventory-status`), {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -275,7 +276,7 @@ const Orders = () => {
   // Reverse inventory deduction
   const handleReverseInventory = async (orderId) => {
     try {
-      const response = await fetch(`/api/orders/${orderId}/reverse-inventory`, {
+      const response = await fetch(getApiUrl(`api/orders/${orderId}/reverse-inventory`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -333,7 +334,7 @@ const Orders = () => {
     // Load collections (Excel files) for the selected brand
     try {
       setLoadingStockFiles(true);
-      const response = await fetch(`https://offaccess-portal-production.up.railway.app/api/catalogue/${brandId}/stock-files`, {
+      const response = await fetch(getApiUrl(`api/catalogue/${brandId}/stock-files`), {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -412,7 +413,7 @@ const Orders = () => {
         formData.append('buyerId', selectedBuyer);
       }
 
-      const response = await fetch('https://offaccess-portal-production.up.railway.app/api/orders', {
+      const response = await fetch(getApiUrl('api/orders'), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -455,7 +456,7 @@ const Orders = () => {
       const formData = new FormData();
       formData.append('invoiceFile', invoiceFile);
 
-      const response = await fetch(`/api/orders/${selectedOrder._id}/approve`, {
+      const response = await fetch(getApiUrl(`api/orders/${selectedOrder._id}/approve`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -497,7 +498,7 @@ const Orders = () => {
   // Reject order
   const handleRejectOrder = async () => {
     try {
-      const response = await fetch(`/api/orders/${selectedOrder._id}/reject`, {
+      const response = await fetch(getApiUrl(`api/orders/${selectedOrder._id}/reject`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -522,7 +523,7 @@ const Orders = () => {
   // Confirm payment
   const handleConfirmPayment = async () => {
     try {
-      const response = await fetch(`/api/orders/${selectedOrder._id}/payment`, {
+      const response = await fetch(getApiUrl(`api/orders/${selectedOrder._id}/payment`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -547,7 +548,7 @@ const Orders = () => {
   // Cancel order
   const handleCancelOrder = async (orderId) => {
     try {
-      const response = await fetch(`/api/orders/${orderId}/cancel`, {
+      const response = await fetch(getApiUrl(`api/orders/${orderId}/cancel`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -578,7 +579,7 @@ const Orders = () => {
       console.log('Order for download:', order); // Debug log
 
       // Use the orders download endpoint
-      const response = await fetch(`/api/orders/${orderId}/download/${fileType}`, {
+      const response = await fetch(getApiUrl(`api/orders/${orderId}/download/${fileType}`), {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -1495,6 +1496,7 @@ const Orders = () => {
               onClick={handleDeleteOrder} 
               variant="contained" 
               color="error"
+              disabled={loading}
               startIcon={<DeleteIcon />}
               sx={{ 
                 borderRadius: 2,
@@ -1508,7 +1510,7 @@ const Orders = () => {
                 }
               }}
             >
-              Confirm Deletion
+              {loading ? 'Deleting...' : 'Confirm Deletion'}
             </Button>
           </>
         );
@@ -1663,7 +1665,7 @@ const Orders = () => {
       const formData = new FormData();
       formData.append('excelFile', invoiceFile);
 
-      const response = await fetch(`/api/orders/${order._id}/replace-attachment`, {
+      const response = await fetch(getApiUrl(`api/orders/${order._id}/replace-attachment`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -1691,7 +1693,7 @@ const Orders = () => {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/orders/${selectedOrder._id}/admin-cancel`, {
+      const response = await fetch(getApiUrl(`api/orders/${selectedOrder._id}/admin-cancel`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -1722,19 +1724,28 @@ const Orders = () => {
       setLoading(true);
       setError(null);
 
-      const response = await fetch(`/api/orders/${selectedOrder._id}`, {
+      console.log('Selected order for deletion:', selectedOrder);
+      console.log('Attempting to delete order:', selectedOrder._id);
+      console.log('Token:', localStorage.getItem('token'));
+
+      const response = await fetch(getApiUrl(`api/orders/${selectedOrder._id}`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
 
+      console.log('Delete response status:', response.status);
+      console.log('Delete response ok:', response.ok);
+
       if (response.ok) {
+        console.log('Order deleted successfully');
         setSnackbar({ open: true, message: 'Order deleted successfully', severity: 'success' });
         handleCloseDialog();
         loadOrders();
       } else {
         const errorData = await response.json();
+        console.error('Delete failed with error:', errorData);
         setError(errorData.error || 'Failed to delete order');
       }
     } catch (error) {
@@ -1768,7 +1779,7 @@ const Orders = () => {
       const formData = new FormData();
       formData.append('excelFile', invoiceFile);
 
-      const response = await fetch(`/api/orders/${selectedOrder._id}/admin-replace-attachment`, {
+      const response = await fetch(getApiUrl(`api/orders/${selectedOrder._id}/admin-replace-attachment`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

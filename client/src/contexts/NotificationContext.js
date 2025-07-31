@@ -31,7 +31,9 @@ export const NotificationProvider = ({ children }) => {
     if (!user) return;
     try {
       setLoading(true);
-      const apiUrl = 'https://offaccess-portal-production.up.railway.app';
+      const apiUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://offaccess-portal-production.up.railway.app' 
+        : 'http://localhost:5000';
       console.log('🔍 NotificationContext - API URL:', apiUrl);
       const response = await fetch(`${apiUrl}/api/notifications?page=${page}&limit=${limit}`, {
         headers: {
@@ -66,7 +68,10 @@ export const NotificationProvider = ({ children }) => {
   // Mark notification as read
   const markAsRead = async (notificationId) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/notifications/${notificationId}/read`, {
+      const apiUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://offaccess-portal-production.up.railway.app' 
+        : 'http://localhost:5000';
+      const response = await fetch(`${apiUrl}/api/notifications/${notificationId}/read`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -92,7 +97,10 @@ export const NotificationProvider = ({ children }) => {
   // Mark all notifications as read
   const markAllAsRead = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/notifications/read-all`, {
+      const apiUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://offaccess-portal-production.up.railway.app' 
+        : 'http://localhost:5000';
+      const response = await fetch(`${apiUrl}/api/notifications/read-all`, {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -114,7 +122,10 @@ export const NotificationProvider = ({ children }) => {
   // Delete notification
   const deleteNotification = async (notificationId) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/api/notifications/${notificationId}`, {
+      const apiUrl = process.env.NODE_ENV === 'production' 
+        ? 'https://offaccess-portal-production.up.railway.app' 
+        : 'http://localhost:5000';
+      const response = await fetch(`${apiUrl}/api/notifications/${notificationId}`, {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

@@ -853,13 +853,29 @@ router.delete('/:id', auth, async (req, res) => {
     }
 
     // Delete any uploaded files if they exist
-    if (order.excelFile && order.excelFile.path) {
+    if (order.excelFile) {
       try {
-        if (fs.existsSync(order.excelFile.path)) {
-          fs.unlinkSync(order.excelFile.path);
-      }
+        const filePath = path.join(__dirname, '..', '..', 'uploads', 'orders', order.excelFile);
+        if (fs.existsSync(filePath)) {
+          fs.unlinkSync(filePath);
+          console.log(`Deleted order file: ${order.excelFile}`);
+        }
       } catch (fileError) {
         console.error('Error deleting order file:', fileError);
+        // Continue with deletion even if file deletion fails
+      }
+    }
+
+    // Delete invoice file if it exists
+    if (order.invoiceFile) {
+      try {
+        const invoicePath = path.join(__dirname, '..', '..', 'uploads', 'orders', order.invoiceFile);
+        if (fs.existsSync(invoicePath)) {
+          fs.unlinkSync(invoicePath);
+          console.log(`Deleted invoice file: ${order.invoiceFile}`);
+        }
+      } catch (fileError) {
+        console.error('Error deleting invoice file:', fileError);
         // Continue with deletion even if file deletion fails
       }
     }
@@ -867,6 +883,7 @@ router.delete('/:id', auth, async (req, res) => {
     // Delete the order from database
     await Order.findByIdAndDelete(orderId);
 
+    console.log(`Order ${orderId} deleted successfully`);
     res.json({ message: 'Order deleted successfully' });
   } catch (error) {
     console.error('Error deleting order:', error);
