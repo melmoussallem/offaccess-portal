@@ -14,10 +14,21 @@ class GoogleSheetsService {
   // Initialize authentication using service account
   initializeAuth() {
     try {
-      const serviceAccountPath = path.join(__dirname, '..', '..', 'google-sheets-key.json');
+      let serviceAccountPath;
+      
+      // Check if GOOGLE_DRIVE_KEY_FILE environment variable is set
+      if (process.env.GOOGLE_DRIVE_KEY_FILE) {
+        serviceAccountPath = process.env.GOOGLE_DRIVE_KEY_FILE;
+        console.log('Using Google Drive key file from environment variable:', serviceAccountPath);
+      } else {
+        // Fallback to default path
+        serviceAccountPath = path.join(__dirname, '..', '..', 'google-sheets-key.json');
+        console.log('Using default Google Drive key file path:', serviceAccountPath);
+      }
       
       if (!fs.existsSync(serviceAccountPath)) {
         console.warn('Google Sheets service account file not found:', serviceAccountPath);
+        console.warn('Google Sheets functionality will be disabled. Set GOOGLE_DRIVE_KEY_FILE environment variable or ensure google-sheets-key.json exists.');
         return;
       }
 
@@ -36,6 +47,7 @@ class GoogleSheetsService {
       console.log('✅ Google Sheets service initialized with service account');
     } catch (error) {
       console.error('❌ Failed to initialize Google Sheets service:', error.message);
+      console.error('Google Sheets functionality will be disabled. Please check your service account configuration.');
     }
   }
 

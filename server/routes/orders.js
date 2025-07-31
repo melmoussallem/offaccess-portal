@@ -508,36 +508,49 @@ router.put('/:id/approve', auth, upload.single('invoiceFile'), async (req, res) 
       order.inventoryErrorDetails = null;
       await order.save();
       
-      // Process inventory deduction using Google Sheets (searches for file by collection name)
-      inventoryResult = await googleSheetsService.processInventoryDeduction(order, { name: order.stockFile });
-      
-      if (inventoryResult.success) {
-        // Update order with inventory deduction details
-        order.inventoryDeducted = true;
-        order.inventoryFileId = inventoryResult.googleSheetFile.id; // Store the found Google Sheet ID
-        order.inventoryDeductionDate = new Date();
-        order.inventoryStatus = 'success';
-        order.inventoryError = null;
-        order.inventoryErrorDetails = null;
-        console.log('Inventory deduction successful');
-      } else {
-        console.warn('Inventory deduction failed:', inventoryResult.message);
-        
-        // Update order with error details
-        order.inventoryStatus = 'error';
-        order.inventoryError = inventoryResult.message;
-        order.inventoryErrorDetails = {
-          insufficientItems: inventoryResult.insufficientItems || [],
-          timestamp: new Date()
+      // Check if Google Sheets service is available
+      if (!googleSheetsService.drive) {
+        console.warn('Google Sheets service not initialized - skipping inventory deduction');
+        inventoryResult = { 
+          success: false, 
+          message: 'Google Sheets service not available - inventory deduction skipped',
+          skipped: true
         };
+        order.inventoryStatus = 'not_applicable';
+        order.inventoryError = 'Google Sheets service not configured';
         await order.save();
+      } else {
+        // Process inventory deduction using Google Sheets (searches for file by collection name)
+        inventoryResult = await googleSheetsService.processInventoryDeduction(order, { name: order.stockFile });
         
-        // If inventory deduction fails, return error to prevent order approval
-        return res.status(400).json({ 
-          error: 'Order cannot be approved due to inventory issues',
-          inventoryError: inventoryResult.message,
-          insufficientItems: inventoryResult.insufficientItems || []
-        });
+        if (inventoryResult.success) {
+          // Update order with inventory deduction details
+          order.inventoryDeducted = true;
+          order.inventoryFileId = inventoryResult.googleSheetFile.id; // Store the found Google Sheet ID
+          order.inventoryDeductionDate = new Date();
+          order.inventoryStatus = 'success';
+          order.inventoryError = null;
+          order.inventoryErrorDetails = null;
+          console.log('Inventory deduction successful');
+        } else {
+          console.warn('Inventory deduction failed:', inventoryResult.message);
+          
+          // Update order with error details
+          order.inventoryStatus = 'error';
+          order.inventoryError = inventoryResult.message;
+          order.inventoryErrorDetails = {
+            insufficientItems: inventoryResult.insufficientItems || [],
+            timestamp: new Date()
+          };
+          await order.save();
+          
+          // If inventory deduction fails, return error to prevent order approval
+          return res.status(400).json({ 
+            error: 'Order cannot be approved due to inventory issues',
+            inventoryError: inventoryResult.message,
+            insufficientItems: inventoryResult.insufficientItems || []
+          });
+        }
       }
     } catch (error) {
       console.error('Error during inventory deduction:', error);
@@ -551,10 +564,23 @@ router.put('/:id/approve', auth, upload.single('invoiceFile'), async (req, res) 
       };
       await order.save();
       
-      return res.status(500).json({ 
-        error: 'Failed to process inventory deduction',
-        inventoryError: error.message
-      });
+      // Don't fail the order approval if Google Sheets is not available
+      if (error.message.includes('Google Drive service not initialized')) {
+        console.warn('Google Sheets service not available - proceeding with order approval without inventory deduction');
+        inventoryResult = { 
+          success: false, 
+          message: 'Google Sheets service not available - inventory deduction skipped',
+          skipped: true
+        };
+        order.inventoryStatus = 'not_applicable';
+        order.inventoryError = 'Google Sheets service not configured';
+        await order.save();
+      } else {
+        return res.status(500).json({ 
+          error: 'Failed to process inventory deduction',
+          inventoryError: error.message
+        });
+      }
     }
     // === END INVENTORY DEDUCTION ===
 
@@ -606,17 +632,36 @@ router.put('/:id/reject', auth, async (req, res) => {
       
       try {
         console.log(`Processing inventory restoration for rejected order ${order.orderNumber}`);
-        inventoryRestorationResult = await googleSheetsService.processInventoryRestoration(order, { name: order.stockFile });
         
-        if (inventoryRestorationResult.success) {
-          order.inventoryRestored = true;
-          order.inventoryRestorationDate = new Date();
-          console.log('Inventory restoration successful for rejected order');
+        // Check if Google Sheets service is available
+        if (!googleSheetsService.drive) {
+          console.warn('Google Sheets service not initialized - skipping inventory restoration');
+          inventoryRestorationResult = { 
+            success: false, 
+            message: 'Google Sheets service not available - inventory restoration skipped',
+            skipped: true
+          };
         } else {
-          console.warn('Inventory restoration failed for rejected order:', inventoryRestorationResult.message);
+          inventoryRestorationResult = await googleSheetsService.processInventoryRestoration(order, { name: order.stockFile });
+          
+          if (inventoryRestorationResult.success) {
+            order.inventoryRestored = true;
+            order.inventoryRestorationDate = new Date();
+            console.log('Inventory restoration successful for rejected order');
+          } else {
+            console.warn('Inventory restoration failed for rejected order:', inventoryRestorationResult.message);
+          }
         }
       } catch (error) {
         console.error('Error during inventory restoration for rejected order:', error);
+        if (error.message.includes('Google Drive service not initialized')) {
+          console.warn('Google Sheets service not available - skipping inventory restoration');
+          inventoryRestorationResult = { 
+            success: false, 
+            message: 'Google Sheets service not available - inventory restoration skipped',
+            skipped: true
+          };
+        }
       }
     }
     // === END INVENTORY RESTORATION ===
@@ -691,17 +736,36 @@ router.put('/:id/admin-cancel', auth, async (req, res) => {
       
       try {
         console.log(`Processing inventory restoration for cancelled order ${order.orderNumber}`);
-        inventoryRestorationResult = await googleSheetsService.processInventoryRestoration(order, { name: order.stockFile });
         
-        if (inventoryRestorationResult.success) {
-          order.inventoryRestored = true;
-          order.inventoryRestorationDate = new Date();
-          console.log('Inventory restoration successful for cancelled order');
+        // Check if Google Sheets service is available
+        if (!googleSheetsService.drive) {
+          console.warn('Google Sheets service not initialized - skipping inventory restoration');
+          inventoryRestorationResult = { 
+            success: false, 
+            message: 'Google Sheets service not available - inventory restoration skipped',
+            skipped: true
+          };
         } else {
-          console.warn('Inventory restoration failed for cancelled order:', inventoryRestorationResult.message);
+          inventoryRestorationResult = await googleSheetsService.processInventoryRestoration(order, { name: order.stockFile });
+          
+          if (inventoryRestorationResult.success) {
+            order.inventoryRestored = true;
+            order.inventoryRestorationDate = new Date();
+            console.log('Inventory restoration successful for cancelled order');
+          } else {
+            console.warn('Inventory restoration failed for cancelled order:', inventoryRestorationResult.message);
+          }
         }
       } catch (error) {
         console.error('Error during inventory restoration for cancelled order:', error);
+        if (error.message.includes('Google Drive service not initialized')) {
+          console.warn('Google Sheets service not available - skipping inventory restoration');
+          inventoryRestorationResult = { 
+            success: false, 
+            message: 'Google Sheets service not available - inventory restoration skipped',
+            skipped: true
+          };
+        }
       }
     }
     // === END INVENTORY RESTORATION ===
@@ -1021,6 +1085,17 @@ router.put('/:id/reverse-inventory', auth, async (req, res) => {
 
     try {
       console.log(`Manually reversing inventory for order ${order.orderNumber}`);
+      
+      // Check if Google Sheets service is available
+      if (!googleSheetsService.drive) {
+        console.warn('Google Sheets service not initialized - cannot perform manual inventory restoration');
+        return res.status(400).json({
+          success: false,
+          error: 'Google Sheets service not available',
+          inventoryError: 'Google Sheets service not configured'
+        });
+      }
+      
       const inventoryRestorationResult = await googleSheetsService.processInventoryRestoration(order, { name: order.stockFile });
       
       if (inventoryRestorationResult.success) {
@@ -1056,7 +1131,15 @@ router.put('/:id/reverse-inventory', auth, async (req, res) => {
     
   } catch (error) {
     console.error('Error reversing inventory:', error);
-    res.status(500).json({ error: 'Failed to reverse inventory' });
+    if (error.message.includes('Google Drive service not initialized')) {
+      res.status(400).json({
+        success: false,
+        error: 'Google Sheets service not available',
+        inventoryError: 'Google Sheets service not configured'
+      });
+    } else {
+      res.status(500).json({ error: 'Failed to reverse inventory' });
+    }
   }
 });
 
