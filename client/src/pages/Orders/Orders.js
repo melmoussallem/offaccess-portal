@@ -626,11 +626,29 @@ const Orders = () => {
       const contentDisposition = response.headers.get('Content-Disposition');
       let filename = `${fileType}_${order.orderNumber}.xlsx`; // fallback
       
+      console.log('📥 Content-Disposition header:', contentDisposition);
+      
       if (contentDisposition) {
+        // Try to extract filename from Content-Disposition header
         const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-        if (filenameMatch && filenameMatch[1]) {
+        const filenameStarMatch = contentDisposition.match(/filename\*=UTF-8''([^;]+)/);
+        
+        console.log('📥 Filename match:', filenameMatch);
+        console.log('📥 Filename star match:', filenameStarMatch);
+        
+        if (filenameStarMatch && filenameStarMatch[1]) {
+          // Use the UTF-8 encoded filename
+          filename = decodeURIComponent(filenameStarMatch[1]);
+          console.log('📥 Using UTF-8 filename:', filename);
+        } else if (filenameMatch && filenameMatch[1]) {
+          // Use the regular filename
           filename = filenameMatch[1].replace(/['"]/g, '');
+          console.log('📥 Using regular filename:', filename);
+        } else {
+          console.log('📥 No filename found in header, using fallback:', filename);
         }
+      } else {
+        console.log('📥 No Content-Disposition header found, using fallback:', filename);
       }
       
       a.download = filename;
