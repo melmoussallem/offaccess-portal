@@ -595,6 +595,8 @@ const Orders = () => {
       setLoading(true);
       setError(null);
       
+      console.log('🎯 Starting download for orderId:', orderId, 'fileType:', fileType);
+      
       // Find the order to get the brand and collection information
       const order = orders.find(o => o._id === orderId);
       if (!order) {
@@ -605,19 +607,28 @@ const Orders = () => {
       console.log('Order for download:', order); // Debug log
 
       // Use the orders download endpoint
-      const response = await fetch(getApiUrl(`api/orders/${orderId}/download/${fileType}`), {
+      const downloadUrl = getApiUrl(`api/orders/${orderId}/download/${fileType}`);
+      console.log('📤 Download URL:', downloadUrl);
+      
+      const response = await fetch(downloadUrl, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
       });
 
+      console.log('📥 Response status:', response.status);
+      console.log('📥 Response ok:', response.ok);
+
       if (!response.ok) {
         const errorData = await response.json();
+        console.log('❌ Download failed:', errorData);
         setError(errorData.message || errorData.error || 'Failed to download file');
         return;
       }
 
+      console.log('📥 Download successful, creating blob...');
       const blob = await response.blob();
+      console.log('📥 Blob created, size:', blob.size);
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
