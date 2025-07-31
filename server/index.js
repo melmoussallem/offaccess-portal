@@ -54,8 +54,10 @@ app.set('trust proxy', 1);
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: true, // Allow all origins for now
-  credentials: true
+  origin: ['https://www.offaccess.com', 'https://offaccess.com', 'http://localhost:3000'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Enable gzip compression for all responses
