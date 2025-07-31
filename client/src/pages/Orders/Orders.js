@@ -606,6 +606,30 @@ const Orders = () => {
 
       console.log('Order for download:', order); // Debug log
 
+      // First, get the file metadata to get the original filename
+      const fileInfoUrl = getApiUrl(`api/orders/${orderId}/file-info/${fileType}`);
+      console.log('📤 File info URL:', fileInfoUrl);
+      
+      const fileInfoResponse = await fetch(fileInfoUrl, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      console.log('📥 File info response status:', fileInfoResponse.status);
+      
+      if (!fileInfoResponse.ok) {
+        console.log('❌ File info request failed');
+        setError('Failed to get file information');
+        return;
+      }
+
+      const fileInfo = await fileInfoResponse.json();
+      console.log('📥 File info:', fileInfo);
+      
+      const originalFilenameFromAPI = fileInfo.originalName;
+      console.log('📥 Original filename from API:', originalFilenameFromAPI);
+
       // Use the orders download endpoint
       const downloadUrl = getApiUrl(`api/orders/${orderId}/download/${fileType}`);
       console.log('📤 Download URL:', downloadUrl);
@@ -633,53 +657,9 @@ const Orders = () => {
       const a = document.createElement('a');
       a.href = url;
       
-      // Get filename from Content-Disposition header or use a default
-      const contentDisposition = response.headers.get('Content-Disposition');
-      const originalFilename = response.headers.get('X-Original-Filename');
-      const fileMetadata = response.headers.get('X-File-Metadata');
-      let filename = `${fileType}_${order.orderNumber}.xlsx`; // fallback
-      
-      console.log('📥 Content-Disposition header:', contentDisposition);
-      console.log('📥 X-Original-Filename header:', originalFilename);
-      console.log('📥 X-File-Metadata header:', fileMetadata);
-      console.log('📥 All response headers:', Array.from(response.headers.entries()));
-      
-      if (contentDisposition) {
-        // Try to extract filename from Content-Disposition header
-        const filenameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
-        const filenameStarMatch = contentDisposition.match(/filename\*=UTF-8''([^;]+)/);
-        
-        console.log('📥 Filename match:', filenameMatch);
-        console.log('📥 Filename star match:', filenameStarMatch);
-        
-        if (filenameStarMatch && filenameStarMatch[1]) {
-          // Use the UTF-8 encoded filename
-          filename = decodeURIComponent(filenameStarMatch[1]);
-          console.log('📥 Using UTF-8 filename:', filename);
-        } else if (filenameMatch && filenameMatch[1]) {
-          // Use the regular filename
-          filename = filenameMatch[1].replace(/['"]/g, '');
-          console.log('📥 Using regular filename:', filename);
-        } else {
-          console.log('📥 No filename found in Content-Disposition, checking X-Original-Filename');
-        }
-      }
-      
-      // If Content-Disposition didn't work, try the custom header
-      if (filename === `${fileType}_${order.orderNumber}.xlsx` && originalFilename) {
-        filename = originalFilename;
-        console.log('📥 Using X-Original-Filename:', filename);
-      } else if (filename === `${fileType}_${order.orderNumber}.xlsx` && fileMetadata) {
-        try {
-          const metadata = JSON.parse(fileMetadata);
-          filename = metadata.originalName;
-          console.log('📥 Using X-File-Metadata:', filename);
-        } catch (error) {
-          console.log('📥 Failed to parse X-File-Metadata:', error);
-        }
-      } else if (filename === `${fileType}_${order.orderNumber}.xlsx`) {
-        console.log('📥 No filename found in any header, using fallback:', filename);
-      }
+      // Use the original filename from the file info API
+      const filename = originalFilenameFromAPI || `${fileType}_${order.orderNumber}.xlsx`;
+      console.log('📥 Using filename:', filename);
       
       a.download = filename;
       document.body.appendChild(a);

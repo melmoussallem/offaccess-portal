@@ -832,6 +832,44 @@ router.put('/:id/cancel', auth, async (req, res) => {
   }
 });
 
+// Get file metadata (filename info)
+router.get('/:id/file-info/:fileType', auth, async (req, res) => {
+  try {
+    const { id, fileType } = req.params;
+    const order = await Order.findById(id);
+
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    if (req.user.role === 'buyer' && order.buyerId.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ error: 'Access denied' });
+    }
+
+    let originalName;
+    let fileExtension;
+
+    if (fileType === 'order' && order.excelFile) {
+      originalName = order.excelFileOriginalName || order.excelFile;
+      fileExtension = require('path').extname(originalName).toLowerCase();
+    } else if (fileType === 'invoice' && order.invoiceFile) {
+      originalName = order.invoiceFileOriginalName || order.invoiceFile;
+      fileExtension = require('path').extname(originalName).toLowerCase();
+    } else {
+      return res.status(404).json({ error: 'File not found' });
+    }
+
+    res.json({
+      originalName,
+      fileExtension,
+      fileType
+    });
+  } catch (error) {
+    console.error('Error getting file info:', error);
+    res.status(500).json({ error: 'Failed to get file info' });
+  }
+});
+
 // Download file
 router.get('/:id/download/:fileType', auth, async (req, res) => {
   try {
