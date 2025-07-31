@@ -333,7 +333,7 @@ const Orders = () => {
     // Load collections (Excel files) for the selected brand
     try {
       setLoadingStockFiles(true);
-      const response = await fetch(`/api/catalogue/${brandId}/stock-files`, {
+      const response = await fetch(`https://offaccess-portal-production.up.railway.app/api/catalogue/${brandId}/stock-files`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
