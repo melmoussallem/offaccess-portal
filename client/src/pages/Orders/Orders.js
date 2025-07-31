@@ -448,6 +448,10 @@ const Orders = () => {
   // Approve order
   const handleApproveOrder = async () => {
     try {
+      console.log('🔄 Starting order approval process...');
+      console.log('Selected order:', selectedOrder);
+      console.log('Invoice file:', invoiceFile);
+      
       if (!invoiceFile) {
         setError('Please upload an invoice');
         return;
@@ -456,6 +460,9 @@ const Orders = () => {
       const formData = new FormData();
       formData.append('invoiceFile', invoiceFile);
 
+      console.log('📤 Sending approval request to:', getApiUrl(`api/orders/${selectedOrder._id}/approve`));
+      console.log('Token:', localStorage.getItem('token') ? 'Present' : 'Missing');
+      
       const response = await fetch(getApiUrl(`api/orders/${selectedOrder._id}/approve`), {
         method: 'PUT',
         headers: {
@@ -464,8 +471,13 @@ const Orders = () => {
         body: formData
       });
 
+      console.log('📥 Response status:', response.status);
+      console.log('📥 Response ok:', response.ok);
+
       if (!response.ok) {
+        console.log('❌ Approval request failed');
         const errorData = await response.json();
+        console.log('Error data:', errorData);
         
         // Handle inventory-specific errors
         if (errorData.inventoryError) {
@@ -479,12 +491,18 @@ const Orders = () => {
             });
           }
           
+          console.log('Setting inventory error:', errorMessage);
           setError(errorMessage);
           return;
         }
         
+        console.log('Setting general error:', errorData.error || 'Failed to approve order');
         throw new Error(errorData.error || 'Failed to approve order');
       }
+
+      console.log('✅ Approval request successful');
+      const responseData = await response.json();
+      console.log('Response data:', responseData);
 
       await loadOrders();
       handleCloseDialog();

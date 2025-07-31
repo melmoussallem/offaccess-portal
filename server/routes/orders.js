@@ -588,7 +588,8 @@ router.put('/:id/approve', auth, upload.single('invoiceFile'), async (req, res) 
     const invoiceFileBuffer = fs.readFileSync(req.file.path);
     const invoiceBase64 = invoiceFileBuffer.toString('base64');
 
-          order.status = 'Awaiting Payment';
+    // Update order status and save invoice
+    order.status = 'Awaiting Payment';
     order.invoiceFile = req.file.filename;
     order.invoiceFileOriginalName = req.file.originalname;
     order.invoiceFileBase64 = invoiceBase64; // Save invoice as base64 for backup
@@ -666,7 +667,8 @@ router.put('/:id/reject', auth, async (req, res) => {
     }
     // === END INVENTORY RESTORATION ===
 
-            order.status = 'Rejected';
+    // Update order status
+    order.status = 'Rejected';
     order.rejectionReason = req.body.reason || '';
     order.updatedAt = new Date();
     await order.save();
