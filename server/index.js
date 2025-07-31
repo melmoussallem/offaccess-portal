@@ -92,9 +92,6 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 // Static file serving for uploads
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Serve static files from the React build directory
-app.use(express.static(path.join(__dirname, '../client/build')));
-
 // Database connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/digital-wholesale-catalogue', {
   useNewUrlParser: true,
@@ -103,9 +100,22 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/digital-w
 .then(() => console.log('Connected to MongoDB'))
 .catch(err => console.error('MongoDB connection error:', err));
 
-// Root route - serve the React app
+// Root route
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/build/index.html'));
+  res.json({ 
+    message: 'Digital Wholesale Catalogue API',
+    version: '1.0.0',
+    status: 'running',
+    endpoints: {
+      auth: '/api/auth',
+      buyers: '/api/buyers',
+      catalogue: '/api/catalogue',
+      orders: '/api/orders',
+      invoices: '/api/invoices',
+      notifications: '/api/notifications',
+      health: '/api/health'
+    }
+  });
 });
 
 // API Routes
@@ -161,13 +171,9 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Catch-all handler for React Router - serve index.html for any non-API route
-app.get('*', (req, res) => {
-  // Don't serve index.html for API routes
-  if (req.path.startsWith('/api/')) {
-    return res.status(404).json({ message: 'Route not found' });
-  }
-  res.sendFile(path.join(__dirname, '../client/build/index.html'));
+// 404 handler
+app.use('*', (req, res) => {
+  res.status(404).json({ message: 'Route not found' });
 });
 
 function startServer(port) {

@@ -606,6 +606,30 @@ const Orders = () => {
 
       console.log('Order for download:', order); // Debug log
 
+      // First, get the file metadata to get the original filename
+      const fileInfoUrl = getApiUrl(`api/orders/${orderId}/file-info/${fileType}`);
+      console.log('📤 File info URL:', fileInfoUrl);
+      
+      const fileInfoResponse = await fetch(fileInfoUrl, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      console.log('📥 File info response status:', fileInfoResponse.status);
+      
+      if (!fileInfoResponse.ok) {
+        console.log('❌ File info request failed');
+        setError('Failed to get file information');
+        return;
+      }
+
+      const fileInfo = await fileInfoResponse.json();
+      console.log('📥 File info:', fileInfo);
+      
+      const originalFilenameFromAPI = fileInfo.originalName;
+      console.log('📥 Original filename from API:', originalFilenameFromAPI);
+
       // Use the orders download endpoint
       const downloadUrl = getApiUrl(`api/orders/${orderId}/download/${fileType}`);
       console.log('📤 Download URL:', downloadUrl);
@@ -629,63 +653,14 @@ const Orders = () => {
       console.log('📥 Download successful, creating blob...');
       const blob = await response.blob();
       console.log('📥 Blob created, size:', blob.size);
-      
-      // Debug: Log all response headers
-      console.log('📥 All response headers:');
-      response.headers.forEach((value, key) => {
-        console.log(`📥 ${key}: ${value}`);
-      });
-      
-      // Get the original filename from the Content-Disposition header
-      const contentDisposition = response.headers.get('Content-Disposition');
-      const xOriginalFilename = response.headers.get('X-Original-Filename');
-      
-      console.log('📥 Content-Disposition header:', contentDisposition);
-      console.log('📥 X-Original-Filename header:', xOriginalFilename);
-      
-      // Extract filename from Content-Disposition header
-      let filename = null;
-      if (contentDisposition) {
-        // Try multiple patterns to extract filename
-        console.log('📥 Raw Content-Disposition:', contentDisposition);
-        
-        // Pattern 1: filename="value"
-        let filenameMatch = contentDisposition.match(/filename="([^"]+)"/);
-        if (filenameMatch) {
-          filename = filenameMatch[1];
-          console.log('📥 Extracted filename from Content-Disposition (pattern 1):', filename);
-        } else {
-          // Pattern 2: filename*=UTF-8''value
-          filenameMatch = contentDisposition.match(/filename\*=UTF-8''([^;]+)/);
-          if (filenameMatch) {
-            filename = decodeURIComponent(filenameMatch[1]);
-            console.log('📥 Extracted filename from Content-Disposition (pattern 2):', filename);
-          } else {
-            // Pattern 3: filename=value
-            filenameMatch = contentDisposition.match(/filename=([^;]+)/);
-            if (filenameMatch) {
-              filename = filenameMatch[1].replace(/['"]/g, '');
-              console.log('📥 Extracted filename from Content-Disposition (pattern 3):', filename);
-            }
-          }
-        }
-      }
-      
-      // Fallback to X-Original-Filename header if Content-Disposition extraction failed
-      if (!filename && xOriginalFilename) {
-        filename = xOriginalFilename;
-        console.log('📥 Using X-Original-Filename header:', filename);
-      }
-      
-      // Final fallback
-      if (!filename) {
-        filename = `${fileType}_${order.orderNumber}.xlsx`;
-        console.log('📥 Using fallback filename:', filename);
-      }
-
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
+      
+      // Use the original filename from the file info API
+      const filename = originalFilenameFromAPI || `${fileType}_${order.orderNumber}.xlsx`;
+      console.log('📥 Using filename:', filename);
+      
       a.download = filename;
       document.body.appendChild(a);
       a.click();
