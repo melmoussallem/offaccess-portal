@@ -956,7 +956,7 @@ const Orders = () => {
                     return (
                       <>
                         <span style={{ fontWeight: 500 }}>Inventory deduction failed:</span><br/>
-                        No Google Sheet file found for "{sheetName}".<br/>
+                        No Google Sheet file found for &quot;{sheetName}&quot;.<br/>
                         Please check the inventory setup for this brand/collection.
                       </>
                     );
@@ -1596,7 +1596,7 @@ const Orders = () => {
           <Box display="flex" alignItems="center" gap={1}>
             <Chip
               icon={<CheckCircleIcon sx={{ color: '#FFFFFF' }} />}
-              label={order.inventoryRestored ? "Restored" : "Deducted"}
+              label={order.inventoryRestored ? 'Restored' : 'Deducted'}
               sx={order.inventoryRestored ? {
                 backgroundColor: '#2196F3', // Blue
                 color: '#FFFFFF',
