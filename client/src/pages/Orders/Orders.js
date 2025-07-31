@@ -59,8 +59,10 @@ const formatAED = (amount) => {
 const stripFileExtension = (filename) => filename ? filename.replace(/\.[^/.]+$/, '') : '';
 
 const Orders = () => {
+  console.log('🔄 Orders component initializing...');
   const { user } = useAuth();
   const isAdmin = user?.role === 'admin';
+  console.log('👤 User role:', user?.role, 'Is admin:', isAdmin);
   
   // State management
   const [orders, setOrders] = useState([]);
@@ -447,6 +449,7 @@ const Orders = () => {
 
   // Approve order
   const handleApproveOrder = async () => {
+    console.log('🎯 handleApproveOrder function called!');
     try {
       console.log('🔄 Starting order approval process...');
       console.log('Selected order:', selectedOrder);
@@ -1286,7 +1289,12 @@ const Orders = () => {
               Cancel
             </Button>
             <Button 
-              onClick={handleApproveOrder} 
+              onClick={() => {
+                console.log('🔘 Approve button clicked!');
+                console.log('Invoice file:', invoiceFile);
+                console.log('Selected order:', selectedOrder);
+                handleApproveOrder();
+              }} 
               variant="contained" 
               color="success"
               startIcon={<CheckCircleIcon />}

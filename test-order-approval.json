@@ -1,0 +1,7 @@
+{
+  "orderId": "test-order-id",
+  "orderNumber": "TEST-001",
+  "brand": "Test Brand",
+  "stockFile": "Test Collection",
+  "status": "Pending Review"
+}
