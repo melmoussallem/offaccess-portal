@@ -884,15 +884,25 @@ router.get('/:id/download/:fileType', auth, async (req, res) => {
     if (base64Data) {
       console.log(`[DOWNLOAD] Serving from base64 for order ${order.orderNumber}`);
       const buffer = Buffer.from(base64Data, 'base64');
+      const contentDisposition = `attachment; filename="${originalName}"; filename*=UTF-8''${encodeURIComponent(originalName)}`;
+      console.log(`[DOWNLOAD] Setting Content-Disposition: ${contentDisposition}`);
       res.setHeader('Content-Type', contentType);
-      res.setHeader('Content-Disposition', `attachment; filename="${originalName}"; filename*=UTF-8''${encodeURIComponent(originalName)}`);
+      res.setHeader('Content-Disposition', contentDisposition);
       res.setHeader('Content-Length', buffer.length);
+      // Also set a custom header as fallback in case Content-Disposition is stripped
+      res.setHeader('X-Original-Filename', originalName);
+      console.log(`[DOWNLOAD] Headers set, sending buffer of size: ${buffer.length}`);
       return res.end(buffer);
     } else if (fs.existsSync(filePath)) {
       console.log(`[DOWNLOAD] Serving from disk for order ${order.orderNumber}`);
+      const contentDisposition = `attachment; filename="${originalName}"; filename*=UTF-8''${encodeURIComponent(originalName)}`;
+      console.log(`[DOWNLOAD] Setting Content-Disposition: ${contentDisposition}`);
       res.setHeader('Content-Type', contentType);
-      res.setHeader('Content-Disposition', `attachment; filename="${originalName}"; filename*=UTF-8''${encodeURIComponent(originalName)}`);
+      res.setHeader('Content-Disposition', contentDisposition);
       res.setHeader('Content-Length', fs.statSync(filePath).size);
+      // Also set a custom header as fallback in case Content-Disposition is stripped
+      res.setHeader('X-Original-Filename', originalName);
+      console.log(`[DOWNLOAD] Headers set, streaming file from disk`);
       const fileStream = fs.createReadStream(filePath);
       return fileStream.pipe(res);
     } else {

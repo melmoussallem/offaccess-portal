@@ -635,9 +635,11 @@ const Orders = () => {
       
       // Get filename from Content-Disposition header or use a default
       const contentDisposition = response.headers.get('Content-Disposition');
+      const originalFilename = response.headers.get('X-Original-Filename');
       let filename = `${fileType}_${order.orderNumber}.xlsx`; // fallback
       
       console.log('📥 Content-Disposition header:', contentDisposition);
+      console.log('📥 X-Original-Filename header:', originalFilename);
       
       if (contentDisposition) {
         // Try to extract filename from Content-Disposition header
@@ -656,10 +658,16 @@ const Orders = () => {
           filename = filenameMatch[1].replace(/['"]/g, '');
           console.log('📥 Using regular filename:', filename);
         } else {
-          console.log('📥 No filename found in header, using fallback:', filename);
+          console.log('📥 No filename found in Content-Disposition, checking X-Original-Filename');
         }
-      } else {
-        console.log('📥 No Content-Disposition header found, using fallback:', filename);
+      }
+      
+      // If Content-Disposition didn't work, try the custom header
+      if (filename === `${fileType}_${order.orderNumber}.xlsx` && originalFilename) {
+        filename = originalFilename;
+        console.log('📥 Using X-Original-Filename:', filename);
+      } else if (filename === `${fileType}_${order.orderNumber}.xlsx`) {
+        console.log('📥 No filename found in any header, using fallback:', filename);
       }
       
       a.download = filename;
