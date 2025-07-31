@@ -653,6 +653,7 @@ const Orders = () => {
 
   // Dialog handlers
   const handleOpenDialog = (type, order = null) => {
+    console.log('📋 Opening dialog:', type, 'Order:', order);
     setDialogType(type);
     setSelectedOrder(order);
     setDialogOpen(true);
@@ -2094,6 +2095,8 @@ const Orders = () => {
         {isAdmin && selectedOrderForMenu?.status === 'Pending Review' && (
           <>
             <MenuItem onClick={() => {
+              console.log('🍽️ Approve menu item clicked!');
+              console.log('Selected order for menu:', selectedOrderForMenu);
               handleMenuClose();
               handleOpenDialog('approve', selectedOrderForMenu);
             }}
