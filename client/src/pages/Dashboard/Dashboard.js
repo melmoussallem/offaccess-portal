@@ -27,6 +27,7 @@ import {
   MonetizationOn as MonetizationOnIcon
 } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
+import { getApiUrl } from '../../config/api';
 
 // Updated color palette for sections
 const SECTION_COLORS = {
@@ -61,7 +62,7 @@ const Dashboard = () => {
       setLoading(true);
       const token = localStorage.getItem('token');
       
-      const response = await fetch('https://offaccess-portal-production.up.railway.app/api/dashboard', {
+      const response = await fetch(getApiUrl('api/dashboard'), {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'

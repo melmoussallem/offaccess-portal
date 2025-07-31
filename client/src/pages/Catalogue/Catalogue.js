@@ -48,8 +48,7 @@ import {
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
 import GoogleSheetPreview from './GoogleSheetPreview';
-
-const API_BASE = 'https://offaccess-portal-production.up.railway.app/api';
+import { getApiUrl } from '../../config/api';
 
 const ExcelSvgIcon = (props) => (
   <svg
@@ -150,7 +149,7 @@ export default function Catalogue() {
     try {
       setLoadingBrands(true);
       const endpoint = isAdmin() ? '/brands' : '/catalogue/brands/accessible';
-      const response = await fetch(`${API_BASE}${endpoint}`, {
+      const response = await fetch(getApiUrl(`api${endpoint}`), {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
           'Cache-Control': 'no-cache',
@@ -178,7 +177,7 @@ export default function Catalogue() {
   const loadBuyers = useCallback(async () => {
     try {
       setLoadingBuyers(true);
-      const response = await fetch('https://offaccess-portal-production.up.railway.app/api/buyers', {
+      const response = await fetch(getApiUrl('api/buyers'), {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -204,7 +203,7 @@ export default function Catalogue() {
     
     try {
       setLoadingStockFiles(true);
-      const response = await fetch(`https://offaccess-portal-production.up.railway.app/api/catalogue/${brand._id}/stock-files`, {
+      const response = await fetch(getApiUrl(`api/catalogue/${brand._id}/stock-files`), {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -471,7 +470,7 @@ export default function Catalogue() {
     }
     
     try {
-      const response = await fetch(`${API_BASE}/brands/${selectedBrandForMenu._id}`, {
+      const response = await fetch(getApiUrl(`api/brands/${selectedBrandForMenu._id}`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -553,7 +552,7 @@ export default function Catalogue() {
     }
     
     try {
-      const response = await fetch(`${API_BASE}/brands`, {
+      const response = await fetch(getApiUrl('api/brands'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -677,7 +676,7 @@ export default function Catalogue() {
 
     try {
       setUpdatingGoogleSheet(true);
-      const response = await fetch(`https://offaccess-portal-production.up.railway.app/api/catalogue/${selectedBrand._id}/stock-file/${selectedFileForGoogleSheet._id}/google-sheet`, {
+      const response = await fetch(getApiUrl(`api/catalogue/${selectedBrand._id}/stock-file/${selectedFileForGoogleSheet._id}/google-sheet`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`,
