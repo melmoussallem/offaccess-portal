@@ -49,7 +49,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import GoogleSheetPreview from './GoogleSheetPreview';
 
-const API_BASE = '/api';
+const API_BASE = 'https://offaccess-portal-production.up.railway.app/api';
 
 const ExcelSvgIcon = (props) => (
   <svg
@@ -178,7 +178,7 @@ export default function Catalogue() {
   const loadBuyers = useCallback(async () => {
     try {
       setLoadingBuyers(true);
-      const response = await fetch('/api/buyers', {
+      const response = await fetch('https://offaccess-portal-production.up.railway.app/api/buyers', {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -204,7 +204,7 @@ export default function Catalogue() {
     
     try {
       setLoadingStockFiles(true);
-      const response = await fetch(`/api/catalogue/${brand._id}/stock-files`, {
+      const response = await fetch(`https://offaccess-portal-production.up.railway.app/api/catalogue/${brand._id}/stock-files`, {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
