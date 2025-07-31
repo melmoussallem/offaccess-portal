@@ -636,10 +636,13 @@ const Orders = () => {
       // Get filename from Content-Disposition header or use a default
       const contentDisposition = response.headers.get('Content-Disposition');
       const originalFilename = response.headers.get('X-Original-Filename');
+      const fileMetadata = response.headers.get('X-File-Metadata');
       let filename = `${fileType}_${order.orderNumber}.xlsx`; // fallback
       
       console.log('📥 Content-Disposition header:', contentDisposition);
       console.log('📥 X-Original-Filename header:', originalFilename);
+      console.log('📥 X-File-Metadata header:', fileMetadata);
+      console.log('📥 All response headers:', Array.from(response.headers.entries()));
       
       if (contentDisposition) {
         // Try to extract filename from Content-Disposition header
@@ -666,6 +669,14 @@ const Orders = () => {
       if (filename === `${fileType}_${order.orderNumber}.xlsx` && originalFilename) {
         filename = originalFilename;
         console.log('📥 Using X-Original-Filename:', filename);
+      } else if (filename === `${fileType}_${order.orderNumber}.xlsx` && fileMetadata) {
+        try {
+          const metadata = JSON.parse(fileMetadata);
+          filename = metadata.originalName;
+          console.log('📥 Using X-File-Metadata:', filename);
+        } catch (error) {
+          console.log('📥 Failed to parse X-File-Metadata:', error);
+        }
       } else if (filename === `${fileType}_${order.orderNumber}.xlsx`) {
         console.log('📥 No filename found in any header, using fallback:', filename);
       }

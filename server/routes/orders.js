@@ -891,6 +891,8 @@ router.get('/:id/download/:fileType', auth, async (req, res) => {
       res.setHeader('Content-Length', buffer.length);
       // Also set a custom header as fallback in case Content-Disposition is stripped
       res.setHeader('X-Original-Filename', originalName);
+      // Add filename to response body as metadata
+      res.setHeader('X-File-Metadata', JSON.stringify({ originalName, fileType }));
       console.log(`[DOWNLOAD] Headers set, sending buffer of size: ${buffer.length}`);
       return res.end(buffer);
     } else if (fs.existsSync(filePath)) {
@@ -902,6 +904,8 @@ router.get('/:id/download/:fileType', auth, async (req, res) => {
       res.setHeader('Content-Length', fs.statSync(filePath).size);
       // Also set a custom header as fallback in case Content-Disposition is stripped
       res.setHeader('X-Original-Filename', originalName);
+      // Add filename to response body as metadata
+      res.setHeader('X-File-Metadata', JSON.stringify({ originalName, fileType }));
       console.log(`[DOWNLOAD] Headers set, streaming file from disk`);
       const fileStream = fs.createReadStream(filePath);
       return fileStream.pipe(res);
