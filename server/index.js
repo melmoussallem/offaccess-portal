@@ -57,7 +57,7 @@ app.use(cors({
   origin: ['https://www.offaccess.com', 'https://offaccess.com', 'http://localhost:3000'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control', 'X-Requested-With']
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control', 'X-Requested-With', 'Pragma']
 }));
 
 // Enable gzip compression for all responses
