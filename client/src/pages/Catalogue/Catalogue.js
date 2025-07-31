@@ -335,7 +335,7 @@ export default function Catalogue() {
 
   const handleDownload = async (file) => {
     try {
-      const response = await fetch(`/api/catalogue/${selectedBrand._id}/stock-file/${file._id}/download`, {
+      const response = await fetch(getApiUrl(`api/catalogue/${selectedBrand._id}/stock-file/${file._id}/download`), {
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
@@ -386,7 +386,7 @@ export default function Catalogue() {
     }
     
     try {
-      const response = await fetch(`/api/catalogue/${selectedBrand._id}/stock-file/${selectedFileForMenu._id}`, {
+      const response = await fetch(getApiUrl(`api/catalogue/${selectedBrand._id}/stock-file/${selectedFileForMenu._id}`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -438,7 +438,7 @@ export default function Catalogue() {
       }
     }
     try {
-      const response = await fetch(`/api/catalogue/brand/${brandForAccess._id}/visibility`, {
+      const response = await fetch(getApiUrl(`api/catalogue/brand/${brandForAccess._id}/visibility`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -504,7 +504,7 @@ export default function Catalogue() {
     }
     
     try {
-      const response = await fetch(`/api/catalogue/${selectedBrand._id}/stock-file/${selectedFileForMenu._id}`, {
+      const response = await fetch(getApiUrl(`api/catalogue/${selectedBrand._id}/stock-file/${selectedFileForMenu._id}`), {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -608,7 +608,7 @@ export default function Catalogue() {
       setUploading(true);
       console.log('Uploading file:', selectedFile.name, 'to brand:', selectedBrand._id);
       
-      const response = await fetch(`/api/catalogue/${selectedBrand._id}/upload`, {
+      const response = await fetch(getApiUrl(`api/catalogue/${selectedBrand._id}/upload`), {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -715,7 +715,7 @@ export default function Catalogue() {
     }
 
     try {
-      const response = await fetch(`/api/catalogue/rename-brand`, {
+      const response = await fetch(getApiUrl(`api/catalogue/rename-brand`), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -762,7 +762,7 @@ export default function Catalogue() {
       const formData = new FormData();
       formData.append('files', replacementFile);
 
-      const response = await fetch(`/api/catalogue/replace-file/${selectedFileForReplace._id}`, {
+      const response = await fetch(getApiUrl(`api/catalogue/${selectedBrand._id}/stock-file/${selectedFileForReplace._id}/replace`), {
         method: 'PUT',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`

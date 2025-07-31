@@ -918,7 +918,10 @@ router.get('/:id/download/:fileType', auth, async (req, res) => {
     const fs = require('fs');
 
     // Debug logging
-    console.log(`[DOWNLOAD] Order: ${order.orderNumber}, fileType: ${fileType}, filename: ${filename}, originalName: ${originalName}`);
+    console.log(`[DOWNLOAD] Order: ${order.orderNumber}, fileType: ${fileType}`);
+    console.log(`[DOWNLOAD] excelFile: ${order.excelFile}, excelFileOriginalName: ${order.excelFileOriginalName}`);
+    console.log(`[DOWNLOAD] invoiceFile: ${order.invoiceFile}, invoiceFileOriginalName: ${order.invoiceFileOriginalName}`);
+    console.log(`[DOWNLOAD] filename: ${filename}, originalName: ${originalName}`);
     if (base64Data) {
       console.log(`[DOWNLOAD] Serving from base64 for order ${order.orderNumber}`);
       const buffer = Buffer.from(base64Data, 'base64');
@@ -1210,8 +1213,12 @@ const replaceAttachmentStorage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
-    // Keep the original filename
-    cb(null, file.originalname);
+    // Add timestamp to avoid filename conflicts while preserving original name
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const originalName = file.originalname;
+    const extension = path.extname(originalName);
+    const baseName = path.basename(originalName, extension);
+    cb(null, `${baseName}-${uniqueSuffix}${extension}`);
   }
 });
 
@@ -1333,10 +1340,15 @@ router.put('/:id/admin-replace-attachment', auth, replaceAttachmentUpload.single
     const newFilePath = path.resolve(req.file.path);
     console.log(`Reading file from: ${newFilePath}`);
     const excelData = extractExcelData(newFilePath);
+
+    // Convert file to base64 and save original name
+    const fileBuffer = fs.readFileSync(newFilePath);
+    const base64File = fileBuffer.toString('base64');
     
     // Update order with new file and data
     order.excelFile = req.file.filename;
     order.excelFileOriginalName = req.file.originalname;
+    order.excelFileBase64 = base64File;
     order.totalQuantity = excelData.totalQuantity;
     order.totalAmount = excelData.totalAmount;
     order.updatedAt = new Date();
