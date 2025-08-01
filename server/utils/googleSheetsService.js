@@ -132,6 +132,25 @@ class GoogleSheetsService {
   // Parse buyer Excel file to extract Reference IDs and quantities
   async parseBuyerExcelFile(filePath) {
     try {
+      console.log(`🔍 Attempting to read Excel file from: ${filePath}`);
+      
+      // Check if file exists
+      if (!fs.existsSync(filePath)) {
+        console.error(`❌ File does not exist: ${filePath}`);
+        
+        // Try alternative path for Railway deployment
+        const alternativePath = path.join(process.cwd(), 'uploads', 'orders', path.basename(filePath));
+        console.log(`🔍 Trying alternative path: ${alternativePath}`);
+        
+        if (fs.existsSync(alternativePath)) {
+          console.log(`✅ File found at alternative path: ${alternativePath}`);
+          filePath = alternativePath;
+        } else {
+          console.error(`❌ File not found at alternative path either: ${alternativePath}`);
+          throw new Error(`Excel file not found: ${path.basename(filePath)}`);
+        }
+      }
+      
       const workbook = xlsx.readFile(filePath, {
         cellFormula: true,
         cellDates: true,
