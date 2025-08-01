@@ -3,6 +3,25 @@ const fs = require('fs');
 const path = require('path');
 const xlsx = require('xlsx');
 
+// Helper function to get the correct file path for uploads
+const getUploadFilePath = (filename) => {
+  const paths = [
+    path.join(process.cwd(), 'uploads', 'orders', filename),
+    path.join(__dirname, '..', '..', 'uploads', 'orders', filename),
+    path.join('/app', 'uploads', 'orders', filename)
+  ];
+  
+  for (const filePath of paths) {
+    if (fs.existsSync(filePath)) {
+      console.log(`✅ File found at: ${filePath}`);
+      return filePath;
+    }
+  }
+  
+  console.error(`❌ File not found in any of the expected paths: ${filename}`);
+  return null;
+};
+
 class GoogleSheetsService {
   constructor() {
     this.auth = null;
@@ -134,22 +153,13 @@ class GoogleSheetsService {
     try {
       console.log(`🔍 Attempting to read Excel file from: ${filePath}`);
       
-      // Check if file exists
-      if (!fs.existsSync(filePath)) {
-        console.error(`❌ File does not exist: ${filePath}`);
-        
-        // Try alternative path for Railway deployment
-        const alternativePath = path.join(process.cwd(), 'uploads', 'orders', path.basename(filePath));
-        console.log(`🔍 Trying alternative path: ${alternativePath}`);
-        
-        if (fs.existsSync(alternativePath)) {
-          console.log(`✅ File found at alternative path: ${alternativePath}`);
-          filePath = alternativePath;
-        } else {
-          console.error(`❌ File not found at alternative path either: ${alternativePath}`);
-          throw new Error(`Excel file not found: ${path.basename(filePath)}`);
-        }
+      // Use helper function to find the correct file path
+      const correctFilePath = getUploadFilePath(path.basename(filePath));
+      if (!correctFilePath) {
+        throw new Error(`Excel file not found: ${path.basename(filePath)}`);
       }
+      
+      filePath = correctFilePath;
       
       const workbook = xlsx.readFile(filePath, {
         cellFormula: true,
