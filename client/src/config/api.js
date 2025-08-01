@@ -1,6 +1,6 @@
 // API Configuration
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://portal.thebrandcollective.co' 
+  ? 'https://offaccess-portal-production.up.railway.app' 
   : 'https://offaccess-portal-production.up.railway.app';
 
 export const getApiUrl = (endpoint) => {
