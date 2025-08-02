@@ -329,6 +329,7 @@ const Help = () => {
         </Box>
       </Box>
     );
+  };
 
     return (
       <Box>
