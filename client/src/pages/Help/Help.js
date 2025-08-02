@@ -183,89 +183,126 @@ const Help = () => {
       swiftCode: 'EBILAEAD'
     };
 
+    const eurBankDetails = {
+      accountNumber: 'EUR 1024295349403',
+      accountName: 'CODE DESIGN APPAREL LLC',
+      iban: 'AE 320260001024295349403',
+      registeredAddress: 'WAREHOUS1, JAFZA, AL KHABAISI DEIRA, DUBAI, SATARI OUTLET, DUBAI, DUBAI, 88109, UNITED ARAB EMIRATES',
+      bankName: 'Emirates NBD',
+      branchName: 'DEIRA CITY CENTRE',
+      swiftCode: 'EBILAEAD'
+    };
+
+    const usdBankDetails = {
+      accountNumber: 'USD 1014295349401',
+      accountName: 'CODE DESIGN APPAREL LLC',
+      iban: 'AE 510260001014295349401',
+      registeredAddress: 'WAREHOUS1, JAFZA, AL KHABAISI DEIRA, DUBAI, SATARI OUTLET, DUBAI, DUBAI, 88109, UNITED ARAB EMIRATES',
+      bankName: 'Emirates NBD',
+      branchName: 'DEIRA CITY CENTRE',
+      swiftCode: 'EBILAEAD'
+    };
+
     const currencies = [
       { label: 'AED Bank Account', value: 'AED', icon: <img src={aedIconUrl} alt="AED" style={{ width: 20, height: 20, filter: 'invert(32%) sepia(92%) saturate(2097%) hue-rotate(186deg) brightness(92%) contrast(92%)', verticalAlign: 'middle' }} /> },
       { label: 'EUR Bank Account', value: 'EUR', icon: <EuroIcon sx={{ color: '#1976d2', fontSize: 24 }} /> },
       { label: 'USD Bank Account', value: 'USD', icon: <AttachMoneyIcon sx={{ color: '#1976d2', fontSize: 24 }} /> }
     ];
 
-    const renderCurrencyTab = (currency) => (
-      <Box sx={{ mt: 0 }}>
-        <Card sx={{ mb: 3, bgcolor: '#f5f7fa', borderRadius: 3 }}>
-          <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-              <BankIcon sx={{ fontSize: 32, color: '#1976d2' }} />
-              <Typography variant="h6" fontWeight="bold">
-                {currency} Bank Account Details
-              </Typography>
-            </Box>
-            
-            <Box sx={{ display: 'grid', gap: 2 }}>
-              <Box sx={{ p: 2, bgcolor: 'white', borderRadius: 2 }}>
-                <Typography variant="h6" fontWeight="bold" color="#1976d2" gutterBottom>
-                  Account Number:
-                </Typography>
-                <Typography variant="body1" fontWeight="bold" sx={{ textAlign: 'left' }}>
-                  {bankDetails.accountNumber}
-                </Typography>
-              </Box>
-              
-              <Box sx={{ p: 2, bgcolor: 'white', borderRadius: 2 }}>
-                <Typography variant="h6" fontWeight="bold" color="#1976d2" gutterBottom>
-                  Account Name:
-                </Typography>
-                <Typography variant="body1" fontWeight="bold" sx={{ textAlign: 'left' }}>
-                  {bankDetails.accountName}
+    const renderCurrencyTab = (currency) => {
+      // Select the appropriate bank details based on currency
+      let selectedBankDetails;
+      switch (currency) {
+        case 'AED':
+          selectedBankDetails = bankDetails;
+          break;
+        case 'EUR':
+          selectedBankDetails = eurBankDetails;
+          break;
+        case 'USD':
+          selectedBankDetails = usdBankDetails;
+          break;
+        default:
+          selectedBankDetails = bankDetails;
+      }
+
+      return (
+        <Box sx={{ mt: 0 }}>
+          <Card sx={{ mb: 3, bgcolor: '#f5f7fa', borderRadius: 3 }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                <BankIcon sx={{ fontSize: 32, color: '#1976d2' }} />
+                <Typography variant="h6" fontWeight="bold">
+                  {currency} Bank Account Details
                 </Typography>
               </Box>
               
-              <Box sx={{ p: 2, bgcolor: 'white', borderRadius: 2 }}>
-                <Typography variant="h6" fontWeight="bold" color="#1976d2" gutterBottom>
-                  IBAN:
-                </Typography>
-                <Typography variant="body1" fontWeight="bold" sx={{ textAlign: 'left' }}>
-                  {bankDetails.iban}
-                </Typography>
+              <Box sx={{ display: 'grid', gap: 2 }}>
+                <Box sx={{ p: 2, bgcolor: 'white', borderRadius: 2 }}>
+                  <Typography variant="h6" fontWeight="bold" color="#1976d2" gutterBottom>
+                    Account Number:
+                  </Typography>
+                  <Typography variant="body1" fontWeight="bold" sx={{ textAlign: 'left' }}>
+                    {selectedBankDetails.accountNumber}
+                  </Typography>
+                </Box>
+                
+                <Box sx={{ p: 2, bgcolor: 'white', borderRadius: 2 }}>
+                  <Typography variant="h6" fontWeight="bold" color="#1976d2" gutterBottom>
+                    Account Name:
+                  </Typography>
+                  <Typography variant="body1" fontWeight="bold" sx={{ textAlign: 'left' }}>
+                    {selectedBankDetails.accountName}
+                  </Typography>
+                </Box>
+                
+                <Box sx={{ p: 2, bgcolor: 'white', borderRadius: 2 }}>
+                  <Typography variant="h6" fontWeight="bold" color="#1976d2" gutterBottom>
+                    IBAN:
+                  </Typography>
+                  <Typography variant="body1" fontWeight="bold" sx={{ textAlign: 'left' }}>
+                    {selectedBankDetails.iban}
+                  </Typography>
+                </Box>
+                
+                <Box sx={{ p: 2, bgcolor: 'white', borderRadius: 2 }}>
+                  <Typography variant="h6" fontWeight="bold" color="#1976d2" gutterBottom>
+                    Registered Address:
+                  </Typography>
+                  <Typography variant="body1" fontWeight="bold" sx={{ textAlign: 'left' }}>
+                    {selectedBankDetails.registeredAddress}
+                  </Typography>
+                </Box>
+                
+                <Box sx={{ p: 2, bgcolor: 'white', borderRadius: 2 }}>
+                  <Typography variant="h6" fontWeight="bold" color="#1976d2" gutterBottom>
+                    Bank Name:
+                  </Typography>
+                  <Typography variant="body1" fontWeight="bold" sx={{ textAlign: 'left' }}>
+                    {selectedBankDetails.bankName}
+                  </Typography>
+                </Box>
+                
+                <Box sx={{ p: 2, bgcolor: 'white', borderRadius: 2 }}>
+                  <Typography variant="h6" fontWeight="bold" color="#1976d2" gutterBottom>
+                    Branch Name:
+                  </Typography>
+                  <Typography variant="body1" fontWeight="bold" sx={{ textAlign: 'left' }}>
+                    {selectedBankDetails.branchName}
+                  </Typography>
+                </Box>
+                
+                <Box sx={{ p: 2, bgcolor: 'white', borderRadius: 2 }}>
+                  <Typography variant="h6" fontWeight="bold" color="#1976d2" gutterBottom>
+                    Swift Code:
+                  </Typography>
+                  <Typography variant="body1" fontWeight="bold" sx={{ textAlign: 'left' }}>
+                    {selectedBankDetails.swiftCode}
+                  </Typography>
+                </Box>
               </Box>
-              
-              <Box sx={{ p: 2, bgcolor: 'white', borderRadius: 2 }}>
-                <Typography variant="h6" fontWeight="bold" color="#1976d2" gutterBottom>
-                  Registered Address:
-                </Typography>
-                <Typography variant="body1" fontWeight="bold" sx={{ textAlign: 'left' }}>
-                  {bankDetails.registeredAddress}
-                </Typography>
-              </Box>
-              
-              <Box sx={{ p: 2, bgcolor: 'white', borderRadius: 2 }}>
-                <Typography variant="h6" fontWeight="bold" color="#1976d2" gutterBottom>
-                  Bank Name:
-                </Typography>
-                <Typography variant="body1" fontWeight="bold" sx={{ textAlign: 'left' }}>
-                  {bankDetails.bankName}
-                </Typography>
-              </Box>
-              
-              <Box sx={{ p: 2, bgcolor: 'white', borderRadius: 2 }}>
-                <Typography variant="h6" fontWeight="bold" color="#1976d2" gutterBottom>
-                  Branch Name:
-                </Typography>
-                <Typography variant="body1" fontWeight="bold" sx={{ textAlign: 'left' }}>
-                  {bankDetails.branchName}
-                </Typography>
-              </Box>
-              
-              <Box sx={{ p: 2, bgcolor: 'white', borderRadius: 2 }}>
-                <Typography variant="h6" fontWeight="bold" color="#1976d2" gutterBottom>
-                  Swift Code:
-                </Typography>
-                <Typography variant="body1" fontWeight="bold" sx={{ textAlign: 'left' }}>
-                  {bankDetails.swiftCode}
-                </Typography>
-              </Box>
-            </Box>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
 
         <Box sx={{
           mt: 3,
