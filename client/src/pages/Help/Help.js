@@ -184,7 +184,7 @@ const Help = () => {
     };
 
     const eurBankDetails = {
-      accountNumber: 'EUR 1024295349403',
+      accountNumber: '1024295349403',
       accountName: 'CODE DESIGN APPAREL LLC',
       iban: 'AE 320260001024295349403',
       registeredAddress: 'WAREHOUS1, JAFZA, AL KHABAISI DEIRA, DUBAI, SATARI OUTLET, DUBAI, DUBAI, 88109, UNITED ARAB EMIRATES',
