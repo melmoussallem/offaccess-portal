@@ -303,7 +303,7 @@ class GoogleSheetsService {
 
   // Parse Excel from file
   parseExcelFromFile(filePath) {
-      
+    try {
       const workbook = xlsx.readFile(filePath, {
         cellFormula: true,
         cellDates: true,
