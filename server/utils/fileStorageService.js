@@ -10,17 +10,50 @@ class FileStorageService {
       // Initialize Storage with service account credentials
       let storageConfig = {};
       
+      console.log('🔍 Checking for service account credentials...');
+      console.log('🔍 GOOGLE_APPLICATION_CREDENTIALS_JSON exists:', !!process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+      console.log('🔍 GOOGLE_APPLICATION_CREDENTIALS_JSON length:', process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON ? process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON.length : 0);
+      
       if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
         console.log('🔑 Using service account credentials from environment variable');
-        const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
-        storageConfig = {
-          credentials: credentials,
-          projectId: credentials.project_id
-        };
+        try {
+          const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+          console.log('🔑 Parsed credentials successfully');
+          console.log('🔑 Project ID:', credentials.project_id);
+          console.log('🔑 Client email:', credentials.client_email);
+          
+          storageConfig = {
+            credentials: credentials,
+            projectId: credentials.project_id
+          };
+        } catch (parseError) {
+          console.error('❌ Error parsing service account credentials:', parseError.message);
+          console.log('🔍 Credentials preview:', process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON.substring(0, 100) + '...');
+        }
       } else {
-        console.log('⚠️ No service account credentials found, using default authentication');
+        console.log('⚠️ No service account credentials found, trying OAuth2 credentials...');
+        
+        // Try to use OAuth2 credentials if available
+        if (process.env.GOOGLE_OAUTH2_CLIENT_ID && process.env.GOOGLE_OAUTH2_CLIENT_SECRET && process.env.GOOGLE_OAUTH2_REFRESH_TOKEN) {
+          console.log('🔑 Using OAuth2 credentials');
+          const { GoogleAuth } = require('google-auth-library');
+          
+          const auth = new GoogleAuth({
+            clientId: process.env.GOOGLE_OAUTH2_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_OAUTH2_CLIENT_SECRET,
+            refreshToken: process.env.GOOGLE_OAUTH2_REFRESH_TOKEN,
+            scopes: ['https://www.googleapis.com/auth/cloud-platform']
+          });
+          
+          storageConfig = {
+            auth: auth
+          };
+        } else {
+          console.log('⚠️ No OAuth2 credentials found either, using default authentication');
+        }
       }
       
+      console.log('🔧 Creating Storage instance with config:', Object.keys(storageConfig));
       this.storage = new Storage(storageConfig);
       this.bucketName = process.env.GOOGLE_CLOUD_STORAGE_BUCKET || 'offaccess-portal-files';
       this.bucket = this.storage.bucket(this.bucketName);
