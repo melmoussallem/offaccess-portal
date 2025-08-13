@@ -40,8 +40,18 @@ class GoogleSheetsService {
       
       let authConfig = {};
       
-      // Method 1: Try Application Default Credentials (ADC) first
-      if (process.env.GOOGLE_USE_ADC === 'true') {
+      // Method 1: Try Workload Identity Federation first
+      if (process.env.GOOGLE_WORKLOAD_IDENTITY_PROJECT_ID) {
+        console.log('🔧 Using Workload Identity Federation...');
+        this.auth = new google.auth.GoogleAuth({
+          scopes: [
+            'https://www.googleapis.com/auth/spreadsheets',
+            'https://www.googleapis.com/auth/drive'
+          ]
+        });
+      }
+      // Method 2: Try Application Default Credentials (ADC)
+      else if (process.env.GOOGLE_USE_ADC === 'true') {
         console.log('🔧 Using Application Default Credentials (ADC)...');
         this.auth = new google.auth.GoogleAuth({
           scopes: [
