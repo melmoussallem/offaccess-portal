@@ -247,6 +247,14 @@ router.get('/', auth, (req, res, next) => {
       console.log('Raw order.buyerId type:', typeof firstOrder.buyerId, 'value:', firstOrder.buyerId);
     }
     const transformedOrders = orders.map(order => {
+      // Debug: Log invoice file info
+      console.log(`🔍 Order ${order.orderNumber} invoice file debug:`, {
+        invoiceFile: order.invoiceFile,
+        invoiceFileType: typeof order.invoiceFile,
+        status: order.status,
+        inventoryStatus: order.inventoryStatus
+      });
+      
       // Ensure buyerId is a plain value
       let buyerIdValue = order.buyerId;
       if (buyerIdValue && typeof buyerIdValue === 'object' && buyerIdValue._id) {
