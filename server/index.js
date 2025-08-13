@@ -54,7 +54,7 @@ app.set('trust proxy', 1);
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: ['https://portal.thebrandcollective.co', 'https://www.offaccess.com', 'https://offaccess.com', 'http://localhost:3000'],
+  origin: ['https://portal.thebrandcollective.co', 'https://www.offaccess.com', 'https://offaccess.com', 'https://portal.offaccess.com', 'http://localhost:3000'],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control', 'X-Requested-With', 'Pragma']
