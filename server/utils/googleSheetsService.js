@@ -208,7 +208,46 @@ class GoogleSheetsService {
       console.log(`🔍 Attempting to read Excel file from: ${filePath}`);
       
       // Use helper function to find the correct file path
-      const correctFilePath = getUploadFilePath(path.basename(filePath));
+      let correctFilePath = getUploadFilePath(path.basename(filePath));
+      
+      // If not found, try searching by original name or common patterns
+      if (!correctFilePath) {
+        console.log(`🔍 File not found by exact name, trying alternative searches...`);
+        
+        // Try to find any Excel file in the uploads directories
+        const uploadDirs = [
+          path.join(process.cwd(), 'uploads', 'orders'),
+          path.join(__dirname, '..', '..', 'uploads', 'orders'),
+          path.join('/app', 'uploads', 'orders'),
+          path.join(process.cwd(), 'uploads'),
+          path.join(__dirname, '..', '..', 'uploads'),
+          path.join('/app', 'uploads'),
+          path.join(process.cwd(), 'uploads', 'catalogue'),
+          path.join(__dirname, '..', '..', 'uploads', 'catalogue'),
+          path.join('/app', 'uploads', 'catalogue')
+        ];
+        
+        for (const dir of uploadDirs) {
+          if (fs.existsSync(dir)) {
+            const files = fs.readdirSync(dir);
+            const excelFiles = files.filter(file => 
+              file.toLowerCase().endsWith('.xlsx') || 
+              file.toLowerCase().endsWith('.xls') || 
+              file.toLowerCase().endsWith('.xlsm')
+            );
+            
+            if (excelFiles.length > 0) {
+              console.log(`🔍 Found Excel files in ${dir}:`, excelFiles);
+              // Use the most recent Excel file
+              const mostRecentFile = excelFiles[excelFiles.length - 1];
+              correctFilePath = path.join(dir, mostRecentFile);
+              console.log(`✅ Using most recent Excel file: ${mostRecentFile}`);
+              break;
+            }
+          }
+        }
+      }
+      
       if (!correctFilePath) {
         throw new Error(`Excel file not found: ${path.basename(filePath)}`);
       }
