@@ -43,6 +43,11 @@ const orderSchema = new mongoose.Schema({
     type: String,
     required: false
   },
+  // Google Cloud Storage path for Excel file
+  excelFileGCS: {
+    type: String,
+    required: false
+  },
   // Invoice file uploaded by admin
   invoiceFile: {
     type: String,
@@ -50,6 +55,16 @@ const orderSchema = new mongoose.Schema({
   },
   // Original filename of the invoice file
   invoiceFileOriginalName: {
+    type: String,
+    required: false
+  },
+  // Base64 version of the invoice file
+  invoiceFileBase64: {
+    type: String,
+    required: false
+  },
+  // Google Cloud Storage path for invoice file
+  invoiceFileGCS: {
     type: String,
     required: false
   },

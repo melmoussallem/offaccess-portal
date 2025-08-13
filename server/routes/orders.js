@@ -9,6 +9,7 @@ const xlsx = require('xlsx');
 const mongoose = require('mongoose');
 const { notifyOrderStatusUpdate } = require('../utils/notificationService');
 const inventoryConfig = require('../config/inventoryConfig');
+const fileStorageService = require('../utils/fileStorageService');
 
 // Safe model import for Brand
 const Brand = mongoose.models.Brand || require('../models/Brand');
@@ -392,11 +393,24 @@ router.post('/', auth, upload.single('excelFile'), async (req, res) => {
     const orderNumber = 'ORD-' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' + 
                        String(Math.floor(Math.random() * 1000)).padStart(3, '0');
 
-         // Extract data from the uploaded Excel file (memory buffer)
-     const { totalQuantity, totalAmount } = extractExcelDataFromBuffer(req.file.buffer, req.file.originalname);
+              // Extract data from the uploaded Excel file (memory buffer)
+      const { totalQuantity, totalAmount } = extractExcelDataFromBuffer(req.file.buffer, req.file.originalname);
 
-     // Convert file to base64
-     const base64File = req.file.buffer.toString('base64');
+      // Upload file to Google Cloud Storage
+      const fileName = fileStorageService.generateUniqueFileName(req.file.originalname, 'order-');
+      const uploadResult = await fileStorageService.uploadFile(
+        req.file.buffer,
+        fileName,
+        req.file.mimetype,
+        'orders'
+      );
+
+      if (!uploadResult.success) {
+        return res.status(500).json({ error: 'Failed to upload file to cloud storage' });
+      }
+
+      // Convert file to base64 for backup (optional - can be removed after migration)
+      const base64File = req.file.buffer.toString('base64');
 
     // Debug: Log the orderBuyer object before creating order data
     console.log('Final orderBuyer object:', {
@@ -417,9 +431,10 @@ router.post('/', auth, upload.single('excelFile'), async (req, res) => {
       status: 'Pending Review',
       totalQuantity,
       totalAmount,
-      excelFile: req.file.filename,
-      excelFileOriginalName: req.file.originalname,
-      excelFileBase64: base64File,
+             excelFile: fileName,
+       excelFileOriginalName: req.file.originalname,
+       excelFileGCS: uploadResult.filePath,
+       excelFileBase64: base64File, // Keep for backward compatibility during migration
       createdAt: new Date(),
       updatedAt: new Date()
     };
@@ -617,19 +632,29 @@ router.put('/:id/approve', auth, upload.single('invoiceFile'), async (req, res) 
     }
     // === END INVENTORY DEDUCTION ===
 
-         // Convert invoice file to base64 for backup
+              // Upload invoice file to Google Cloud Storage
+     const fileName = fileStorageService.generateUniqueFileName(req.file.originalname, 'invoice-');
+     const uploadResult = await fileStorageService.uploadFile(
+       req.file.buffer,
+       fileName,
+       req.file.mimetype,
+       'orders'
+     );
+
+     if (!uploadResult.success) {
+       return res.status(500).json({ error: 'Failed to upload invoice file to cloud storage' });
+     }
+
+     // Convert invoice file to base64 for backup (optional - can be removed after migration)
      const invoiceBase64 = req.file.buffer.toString('base64');
 
-    // Update order status and save invoice
-    order.status = 'Awaiting Payment';
-    // Generate a filename since we're using memory storage
-    const timestamp = Date.now();
-    const randomId = Math.floor(Math.random() * 1000000000);
-    const fileExtension = path.extname(req.file.originalname);
-    order.invoiceFile = `invoiceFile-${timestamp}-${randomId}${fileExtension}`;
-    order.invoiceFileOriginalName = req.file.originalname;
-    order.invoiceFileBase64 = invoiceBase64; // Save invoice as base64 for backup
-    order.updatedAt = new Date();
+     // Update order status and save invoice
+     order.status = 'Awaiting Payment';
+     order.invoiceFile = fileName;
+     order.invoiceFileOriginalName = req.file.originalname;
+     order.invoiceFileGCS = uploadResult.filePath;
+     order.invoiceFileBase64 = invoiceBase64; // Keep for backward compatibility during migration
+     order.updatedAt = new Date();
     
     console.log('💾 Final order save - Status:', order.status, 'Inventory Status:', order.inventoryStatus, 'Inventory Deducted:', order.inventoryDeducted);
     console.log('📁 Invoice file details - filename:', req.file.filename, 'originalname:', req.file.originalname);
@@ -947,12 +972,14 @@ router.get('/:id/download/:fileType', auth, async (req, res) => {
     if (fileType === 'order' && order.excelFile) {
       filename = order.excelFile;
       originalName = order.excelFileOriginalName || filename;
-      base64Data = order.excelFileBase64;
+      filePath = order.excelFileGCS || null;
+      base64Data = order.excelFileBase64; // Fallback for migration period
       fileExtension = require('path').extname(originalName).toLowerCase();
     } else if (fileType === 'invoice' && order.invoiceFile) {
       filename = order.invoiceFile;
       originalName = order.invoiceFileOriginalName || order.invoiceFile;
-      base64Data = order.invoiceFileBase64;
+      filePath = order.invoiceFileGCS || null;
+      base64Data = order.invoiceFileBase64; // Fallback for migration period
       fileExtension = require('path').extname(originalName).toLowerCase();
     } else {
       return res.status(404).json({ error: 'File not found' });
@@ -968,15 +995,33 @@ router.get('/:id/download/:fileType', auth, async (req, res) => {
       contentType = 'application/pdf';
     }
 
-    const filePath = require('path').join(__dirname, '..', '..', 'uploads', 'orders', filename);
-    const fs = require('fs');
-
     // Debug logging
     console.log(`[DOWNLOAD] Order: ${order.orderNumber}, fileType: ${fileType}, filename: ${filename}, originalName: ${originalName}`);
+    console.log(`[DOWNLOAD] GCS file path: ${filePath}`);
     console.log(`[DOWNLOAD] Base64 data present: ${!!base64Data}, Base64 length: ${base64Data ? base64Data.length : 0}`);
-    console.log(`[DOWNLOAD] File path: ${filePath}`);
-    console.log(`[DOWNLOAD] File exists on disk: ${fs.existsSync(filePath)}`);
     
+    // Try Google Cloud Storage first
+    if (filePath) {
+      console.log(`[DOWNLOAD] Attempting to download from Google Cloud Storage: ${filePath}`);
+      const downloadResult = await fileStorageService.downloadFile(filePath);
+      
+      if (downloadResult.success) {
+        console.log(`[DOWNLOAD] Serving from Google Cloud Storage for order ${order.orderNumber}`);
+        const contentDisposition = `attachment; filename="${originalName}"; filename*=UTF-8''${encodeURIComponent(originalName)}`;
+        console.log(`[DOWNLOAD] Setting Content-Disposition: ${contentDisposition}`);
+        res.setHeader('Content-Type', downloadResult.contentType || contentType);
+        res.setHeader('Content-Disposition', contentDisposition);
+        res.setHeader('Content-Length', downloadResult.buffer.length);
+        res.setHeader('X-Original-Filename', originalName);
+        res.setHeader('X-File-Metadata', JSON.stringify({ originalName, fileType }));
+        console.log(`[DOWNLOAD] Headers set, sending buffer of size: ${downloadResult.buffer.length}`);
+        return res.end(downloadResult.buffer);
+      } else {
+        console.log(`[DOWNLOAD] GCS download failed: ${downloadResult.error}`);
+      }
+    }
+    
+    // Fallback to base64 data (for migration period)
     if (base64Data) {
       console.log(`[DOWNLOAD] Serving from base64 for order ${order.orderNumber}`);
       const buffer = Buffer.from(base64Data, 'base64');
@@ -985,30 +1030,14 @@ router.get('/:id/download/:fileType', auth, async (req, res) => {
       res.setHeader('Content-Type', contentType);
       res.setHeader('Content-Disposition', contentDisposition);
       res.setHeader('Content-Length', buffer.length);
-      // Also set a custom header as fallback in case Content-Disposition is stripped
       res.setHeader('X-Original-Filename', originalName);
-      // Add filename to response body as metadata
       res.setHeader('X-File-Metadata', JSON.stringify({ originalName, fileType }));
       console.log(`[DOWNLOAD] Headers set, sending buffer of size: ${buffer.length}`);
       return res.end(buffer);
-    } else if (fs.existsSync(filePath)) {
-      console.log(`[DOWNLOAD] Serving from disk for order ${order.orderNumber}`);
-      const contentDisposition = `attachment; filename="${originalName}"; filename*=UTF-8''${encodeURIComponent(originalName)}`;
-      console.log(`[DOWNLOAD] Setting Content-Disposition: ${contentDisposition}`);
-      res.setHeader('Content-Type', contentType);
-      res.setHeader('Content-Disposition', contentDisposition);
-      res.setHeader('Content-Length', fs.statSync(filePath).size);
-      // Also set a custom header as fallback in case Content-Disposition is stripped
-      res.setHeader('X-Original-Filename', originalName);
-      // Add filename to response body as metadata
-      res.setHeader('X-File-Metadata', JSON.stringify({ originalName, fileType }));
-      console.log(`[DOWNLOAD] Headers set, streaming file from disk`);
-      const fileStream = fs.createReadStream(filePath);
-      return fileStream.pipe(res);
-    } else {
-      console.log(`[DOWNLOAD] File not found for order ${order.orderNumber}`);
-      return res.status(404).json({ error: 'File not found on server or in database. Please contact support.' });
     }
+    
+    console.log(`[DOWNLOAD] File not found for order ${order.orderNumber}`);
+    return res.status(404).json({ error: 'File not found in cloud storage or database. Please contact support.' });
   } catch (error) {
     console.error('Error downloading file:', error);
     res.status(500).json({ error: 'Failed to download file' });
