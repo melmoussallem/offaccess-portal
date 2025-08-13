@@ -27,6 +27,15 @@ if (!process.env.JWT_SECRET) {
 
 console.log('✅ Environment variables check passed');
 
+// Test Google Cloud Storage initialization
+console.log('🔧 Testing Google Cloud Storage initialization...');
+try {
+  const fileStorageService = require('./utils/fileStorageService');
+  console.log('✅ FileStorageService loaded successfully');
+} catch (error) {
+  console.error('❌ Error loading FileStorageService:', error.message);
+}
+
 const authRoutes = require('./routes/auth');
 const buyerRoutes = require('./routes/buyers');
 const catalogueRoutes = require('./routes/catalogue');

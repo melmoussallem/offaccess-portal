@@ -1,5 +1,7 @@
 const { Storage } = require('@google-cloud/storage');
 const path = require('path');
+const fs = require('fs');
+const os = require('os');
 
 class FileStorageService {
   constructor() {
@@ -22,10 +24,18 @@ class FileStorageService {
           console.log('🔑 Project ID:', credentials.project_id);
           console.log('🔑 Client email:', credentials.client_email);
           
-          storageConfig = {
-            credentials: credentials,
-            projectId: credentials.project_id
-          };
+          // Create a temporary credentials file
+          const tempCredentialsPath = path.join(os.tmpdir(), `gcs-credentials-${Date.now()}.json`);
+          fs.writeFileSync(tempCredentialsPath, JSON.stringify(credentials, null, 2));
+          
+          console.log('🔑 Created temporary credentials file:', tempCredentialsPath);
+          
+          // Set the environment variable to point to the temporary file
+          process.env.GOOGLE_APPLICATION_CREDENTIALS = tempCredentialsPath;
+          
+          // Use default configuration which will now read from the file
+          storageConfig = {};
+          
         } catch (parseError) {
           console.error('❌ Error parsing service account credentials:', parseError.message);
           console.log('🔍 Credentials preview:', process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON.substring(0, 100) + '...');
