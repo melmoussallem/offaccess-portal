@@ -509,8 +509,15 @@ router.put('/:id/approve', auth, upload.single('invoiceFile'), async (req, res) 
     }
 
     // === INVENTORY DEDUCTION USING GOOGLE SHEETS ===
-    const googleSheetsService = require('../utils/googleSheetsService');
+    let googleSheetsService;
     let inventoryResult = { success: false, message: 'No inventory processing attempted' };
+    
+    try {
+      googleSheetsService = require('../utils/googleSheetsService');
+    } catch (error) {
+      console.error('Failed to load Google Sheets service:', error.message);
+      googleSheetsService = null;
+    }
     
     try {
       console.log(`Processing inventory deduction for order ${order.orderNumber}`);
@@ -524,7 +531,7 @@ router.put('/:id/approve', auth, upload.single('invoiceFile'), async (req, res) 
       await order.save();
       
       // Check if Google Sheets service is available
-      if (!googleSheetsService.drive) {
+      if (!googleSheetsService || !googleSheetsService.drive) {
         console.warn('Google Sheets service not initialized - skipping inventory deduction');
         console.warn('Service account file path check needed');
         inventoryResult = { 
@@ -642,22 +649,28 @@ router.put('/:id/reject', auth, async (req, res) => {
       return res.status(400).json({ error: 'Order cannot be rejected in current status' });
     }
 
-    // === INVENTORY RESTORATION (if inventory was previously deducted) ===
-    let inventoryRestorationResult = null;
-    if (order.inventoryDeducted && !order.inventoryRestored) {
-      const googleSheetsService = require('../utils/googleSheetsService');
-      
-      try {
-        console.log(`Processing inventory restoration for rejected order ${order.orderNumber}`);
-        
-        // Check if Google Sheets service is available
-        if (!googleSheetsService.drive) {
-          console.warn('Google Sheets service not initialized - skipping inventory restoration');
-          inventoryRestorationResult = { 
-            success: false, 
-            message: 'Google Sheets service not available - inventory restoration skipped',
-            skipped: true
-          };
+         // === INVENTORY RESTORATION (if inventory was previously deducted) ===
+     let inventoryRestorationResult = null;
+     if (order.inventoryDeducted && !order.inventoryRestored) {
+       let googleSheetsService;
+       try {
+         googleSheetsService = require('../utils/googleSheetsService');
+       } catch (error) {
+         console.error('Failed to load Google Sheets service:', error.message);
+         googleSheetsService = null;
+       }
+       
+       try {
+         console.log(`Processing inventory restoration for rejected order ${order.orderNumber}`);
+         
+         // Check if Google Sheets service is available
+         if (!googleSheetsService || !googleSheetsService.drive) {
+           console.warn('Google Sheets service not initialized - skipping inventory restoration');
+           inventoryRestorationResult = { 
+             success: false, 
+             message: 'Google Sheets service not available - inventory restoration skipped',
+             skipped: true
+           };
         } else {
           inventoryRestorationResult = await googleSheetsService.processInventoryRestoration(order, { name: order.stockFile });
           
@@ -747,22 +760,28 @@ router.put('/:id/admin-cancel', auth, async (req, res) => {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    // === INVENTORY RESTORATION (if inventory was previously deducted) ===
-    let inventoryRestorationResult = null;
-    if (order.inventoryDeducted && !order.inventoryRestored) {
-      const googleSheetsService = require('../utils/googleSheetsService');
-      
-      try {
-        console.log(`Processing inventory restoration for cancelled order ${order.orderNumber}`);
-        
-        // Check if Google Sheets service is available
-        if (!googleSheetsService.drive) {
-          console.warn('Google Sheets service not initialized - skipping inventory restoration');
-          inventoryRestorationResult = { 
-            success: false, 
-            message: 'Google Sheets service not available - inventory restoration skipped',
-            skipped: true
-          };
+         // === INVENTORY RESTORATION (if inventory was previously deducted) ===
+     let inventoryRestorationResult = null;
+     if (order.inventoryDeducted && !order.inventoryRestored) {
+       let googleSheetsService;
+       try {
+         googleSheetsService = require('../utils/googleSheetsService');
+       } catch (error) {
+         console.error('Failed to load Google Sheets service:', error.message);
+         googleSheetsService = null;
+       }
+       
+       try {
+         console.log(`Processing inventory restoration for cancelled order ${order.orderNumber}`);
+         
+         // Check if Google Sheets service is available
+         if (!googleSheetsService || !googleSheetsService.drive) {
+           console.warn('Google Sheets service not initialized - skipping inventory restoration');
+           inventoryRestorationResult = { 
+             success: false, 
+             message: 'Google Sheets service not available - inventory restoration skipped',
+             skipped: true
+           };
         } else {
           inventoryRestorationResult = await googleSheetsService.processInventoryRestoration(order, { name: order.stockFile });
           
@@ -1049,15 +1068,22 @@ router.put('/:id/reverse-inventory', auth, async (req, res) => {
       return res.status(400).json({ error: 'No inventory file ID found for this order' });
     }
 
-    // Restore inventory
-    const googleSheetsService = require('../utils/googleSheetsService');
-    const spreadsheetId = inventoryConfig.getSpreadsheetId(order.brand, order.stockFile);
-    
-    if (!spreadsheetId) {
-      return res.status(400).json({ error: 'No inventory sheet configured for this brand/collection' });
-    }
+         // Restore inventory
+     let googleSheetsService;
+     try {
+       googleSheetsService = require('../utils/googleSheetsService');
+     } catch (error) {
+       console.error('Failed to load Google Sheets service:', error.message);
+       return res.status(500).json({ error: 'Google Sheets service not available' });
+     }
+     
+     const spreadsheetId = inventoryConfig.getSpreadsheetId(order.brand, order.stockFile);
+     
+     if (!spreadsheetId) {
+       return res.status(400).json({ error: 'No inventory sheet configured for this brand/collection' });
+     }
 
-    try {
+     try {
       console.log(`Manually reversing inventory for order ${order.orderNumber}`);
       const inventoryRestorationResult = await googleSheetsService.processInventoryRestoration(order, { name: order.stockFile });
       
@@ -1145,26 +1171,33 @@ router.put('/:id/reverse-inventory', auth, async (req, res) => {
       return res.status(400).json({ error: 'Inventory has already been restored for this order' });
     }
 
-    // === INVENTORY RESTORATION ===
-    const googleSheetsService = require('../utils/googleSheetsService');
-    const spreadsheetId = inventoryConfig.getSpreadsheetId(order.brand, order.stockFile);
-    
-    if (!spreadsheetId) {
-      return res.status(400).json({ error: 'No inventory sheet configured for this brand/collection' });
-    }
+         // === INVENTORY RESTORATION ===
+     let googleSheetsService;
+     try {
+       googleSheetsService = require('../utils/googleSheetsService');
+     } catch (error) {
+       console.error('Failed to load Google Sheets service:', error.message);
+       return res.status(500).json({ error: 'Google Sheets service not available' });
+     }
+     
+     const spreadsheetId = inventoryConfig.getSpreadsheetId(order.brand, order.stockFile);
+     
+     if (!spreadsheetId) {
+       return res.status(400).json({ error: 'No inventory sheet configured for this brand/collection' });
+     }
 
-    try {
-      console.log(`Manually reversing inventory for order ${order.orderNumber}`);
-      
-      // Check if Google Sheets service is available
-      if (!googleSheetsService.drive) {
-        console.warn('Google Sheets service not initialized - cannot perform manual inventory restoration');
-        return res.status(400).json({
-          success: false,
-          error: 'Google Sheets service not available',
-          inventoryError: 'Google Sheets service not configured'
-        });
-      }
+     try {
+       console.log(`Manually reversing inventory for order ${order.orderNumber}`);
+       
+       // Check if Google Sheets service is available
+       if (!googleSheetsService || !googleSheetsService.drive) {
+         console.warn('Google Sheets service not initialized - cannot perform manual inventory restoration');
+         return res.status(400).json({
+           success: false,
+           error: 'Google Sheets service not available',
+           inventoryError: 'Google Sheets service not configured'
+         });
+       }
       
       const inventoryRestorationResult = await googleSheetsService.processInventoryRestoration(order, { name: order.stockFile });
       
