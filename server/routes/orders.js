@@ -556,6 +556,7 @@ router.put('/:id/approve', auth, upload.single('invoiceFile'), async (req, res) 
           order.inventoryError = null;
           order.inventoryErrorDetails = null;
           console.log('Inventory deduction successful');
+          console.log('✅ Updated order inventory status to:', order.inventoryStatus);
         } else {
           console.warn('Inventory deduction failed:', inventoryResult.message);
           
@@ -617,16 +618,22 @@ router.put('/:id/approve', auth, upload.single('invoiceFile'), async (req, res) 
     order.invoiceFileOriginalName = req.file.originalname;
     order.invoiceFileBase64 = invoiceBase64; // Save invoice as base64 for backup
     order.updatedAt = new Date();
+    
+    console.log('💾 Final order save - Status:', order.status, 'Inventory Status:', order.inventoryStatus, 'Inventory Deducted:', order.inventoryDeducted);
     await order.save();
+    console.log('✅ Order saved successfully');
 
     // Notify buyer about order approval
     const buyer = await require('../models/User').findById(order.buyerId);
     await notifyOrderStatusUpdate(buyer, order);
 
-    res.json({
+    const responseData = {
       ...order.toObject(),
       inventoryDeduction: inventoryResult
-    });
+    };
+    
+    console.log('📤 Sending response to frontend - Order Status:', responseData.status, 'Inventory Status:', responseData.inventoryStatus, 'Inventory Deducted:', responseData.inventoryDeducted);
+    res.json(responseData);
   } catch (error) {
     console.error('Error approving order:', error);
     res.status(500).json({ error: 'Failed to approve order' });
