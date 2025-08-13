@@ -13,23 +13,9 @@ const inventoryConfig = require('../config/inventoryConfig');
 // Safe model import for Brand
 const Brand = mongoose.models.Brand || require('../models/Brand');
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadDir = 'uploads/orders';
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
-  }
-});
-
+// Configure multer for file uploads (using memory storage for Railway compatibility)
 const upload = multer({ 
-  storage: storage,
+  storage: multer.memoryStorage(),
   fileFilter: (req, file, cb) => {
     const allowedTypes = ['.xlsx', '.xls', '.xlsm', '.pdf'];
     const ext = path.extname(file.originalname).toLowerCase();
@@ -59,6 +45,36 @@ const extractExcelData = (filePath) => {
       cellNF: false,
       cellStyles: false
     });
+    
+    return extractExcelDataFromWorkbook(workbook);
+  } catch (error) {
+    console.error('Error extracting Excel data:', error);
+    return { totalQuantity: 0, totalAmount: 0 };
+  }
+};
+
+// Helper function to extract data from Excel file buffer (for Railway)
+const extractExcelDataFromBuffer = (buffer, originalname) => {
+  try {
+    console.log(`Attempting to read Excel file from buffer: ${originalname}`);
+    
+    // Read Excel file from buffer
+    const workbook = xlsx.read(buffer, { 
+      cellFormula: true,
+      cellDates: true,
+      cellNF: false,
+      cellStyles: false
+    });
+    
+    return extractExcelDataFromWorkbook(workbook);
+  } catch (error) {
+    console.error('Error extracting Excel data from buffer:', error);
+    return { totalQuantity: 0, totalAmount: 0 };
+  }
+};
+
+// Helper function to extract data from workbook
+const extractExcelDataFromWorkbook = (workbook) => {
     
     console.log('Available sheets:', workbook.SheetNames);
     
@@ -447,11 +463,10 @@ router.put('/:id/update', auth, upload.single('excelFile'), async (req, res) => 
     if (!req.file) {
       return res.status(400).json({ error: 'Excel file is required' });
     }
-    // Extract data from the uploaded Excel file
-    const { totalQuantity, totalAmount } = extractExcelData(req.file.path);
+    // Extract data from the uploaded Excel file (memory buffer)
+    const { totalQuantity, totalAmount } = extractExcelDataFromBuffer(req.file.buffer, req.file.originalname);
     // Convert file to base64
-    const fileBuffer = fs.readFileSync(req.file.path);
-    const base64File = fileBuffer.toString('base64');
+    const base64File = req.file.buffer.toString('base64');
     // Remove old file if it exists
     if (order.excelFile) {
       const oldFilePath = path.join(__dirname, '..', '..', 'uploads', 'orders', order.excelFile);

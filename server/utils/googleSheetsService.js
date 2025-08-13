@@ -277,6 +277,33 @@ class GoogleSheetsService {
       
       filePath = correctFilePath;
       
+      return this.parseExcelFromFile(filePath);
+    } catch (error) {
+      throw new Error(`Failed to parse Excel file: ${error.message}`);
+    }
+  }
+
+  // Parse buyer Excel file from base64 data (for Railway)
+  async parseBuyerExcelFromBase64(base64Data, originalName) {
+    try {
+      console.log(`🔍 Attempting to read Excel file from base64: ${originalName}`);
+      
+      if (!base64Data) {
+        throw new Error('No base64 data provided');
+      }
+      
+      // Convert base64 to buffer
+      const buffer = Buffer.from(base64Data, 'base64');
+      
+      return this.parseExcelFromBuffer(buffer, originalName);
+    } catch (error) {
+      throw new Error(`Failed to parse Excel file from base64: ${error.message}`);
+    }
+  }
+
+  // Parse Excel from file
+  parseExcelFromFile(filePath) {
+      
       const workbook = xlsx.readFile(filePath, {
         cellFormula: true,
         cellDates: true,
@@ -284,6 +311,31 @@ class GoogleSheetsService {
         cellStyles: false
       });
 
+      return this.parseExcelFromWorkbook(workbook);
+    } catch (error) {
+      throw new Error(`Failed to parse Excel file: ${error.message}`);
+    }
+  }
+
+  // Parse Excel from buffer
+  parseExcelFromBuffer(buffer, originalName) {
+    try {
+      const workbook = xlsx.read(buffer, {
+        cellFormula: true,
+        cellDates: true,
+        cellNF: false,
+        cellStyles: false
+      });
+
+      return this.parseExcelFromWorkbook(workbook);
+    } catch (error) {
+      throw new Error(`Failed to parse Excel file from buffer: ${error.message}`);
+    }
+  }
+
+  // Parse Excel from workbook
+  parseExcelFromWorkbook(workbook) {
+    try {
       // Try to find the 'Buyer Order Form' sheet first, then fall back to first sheet
       let sheetName = workbook.SheetNames.find(name => name.trim().toLowerCase() === 'buyer order form');
       if (!sheetName) {
@@ -317,7 +369,7 @@ class GoogleSheetsService {
       console.log(`Parsed ${orderItems.length} items from buyer Excel file`);
       return orderItems;
     } catch (error) {
-      throw new Error(`Failed to parse Excel file: ${error.message}`);
+      throw new Error(`Failed to parse Excel workbook: ${error.message}`);
     }
   }
 
@@ -458,9 +510,8 @@ class GoogleSheetsService {
       
       console.log(`Found Google Sheet: ${googleSheetFile.name} (ID: ${spreadsheetId})`);
       
-      // Parse the buyer's Excel file
-      const orderFilePath = path.join(__dirname, '..', '..', 'uploads', 'orders', order.excelFile);
-      const orderItems = await this.parseBuyerExcelFile(orderFilePath);
+      // Parse the buyer's Excel file from base64 data
+      const orderItems = await this.parseBuyerExcelFromBase64(order.excelFileBase64, order.excelFileOriginalName);
       
       if (orderItems.length === 0) {
         return {
@@ -518,9 +569,8 @@ class GoogleSheetsService {
       
       console.log(`Found Google Sheet: ${googleSheetFile.name} (ID: ${spreadsheetId})`);
       
-      // Parse the buyer's Excel file
-      const orderFilePath = path.join(__dirname, '..', '..', 'uploads', 'orders', order.excelFile);
-      const orderItems = await this.parseBuyerExcelFile(orderFilePath);
+      // Parse the buyer's Excel file from base64 data
+      const orderItems = await this.parseBuyerExcelFromBase64(order.excelFileBase64, order.excelFileOriginalName);
       
       if (orderItems.length === 0) {
         return {
