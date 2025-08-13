@@ -628,8 +628,11 @@ router.put('/:id/approve', auth, upload.single('invoiceFile'), async (req, res) 
     order.updatedAt = new Date();
     
     console.log('💾 Final order save - Status:', order.status, 'Inventory Status:', order.inventoryStatus, 'Inventory Deducted:', order.inventoryDeducted);
+    console.log('📁 Invoice file details - filename:', req.file.filename, 'originalname:', req.file.originalname);
+    console.log('📁 Order invoiceFile before save:', order.invoiceFile);
     await order.save();
     console.log('✅ Order saved successfully');
+    console.log('📁 Order invoiceFile after save:', order.invoiceFile);
 
     // Notify buyer about order approval
     const buyer = await require('../models/User').findById(order.buyerId);
