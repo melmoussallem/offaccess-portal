@@ -622,7 +622,11 @@ router.put('/:id/approve', auth, upload.single('invoiceFile'), async (req, res) 
 
     // Update order status and save invoice
     order.status = 'Awaiting Payment';
-    order.invoiceFile = req.file.filename;
+    // Generate a filename since we're using memory storage
+    const timestamp = Date.now();
+    const randomId = Math.floor(Math.random() * 1000000000);
+    const fileExtension = path.extname(req.file.originalname);
+    order.invoiceFile = `invoiceFile-${timestamp}-${randomId}${fileExtension}`;
     order.invoiceFileOriginalName = req.file.originalname;
     order.invoiceFileBase64 = invoiceBase64; // Save invoice as base64 for backup
     order.updatedAt = new Date();
