@@ -228,28 +228,51 @@ class GoogleSheetsService {
         ];
         
         for (const dir of uploadDirs) {
+          console.log(`🔍 Checking directory: ${dir}`);
           if (fs.existsSync(dir)) {
-            const files = fs.readdirSync(dir);
-            const excelFiles = files.filter(file => 
-              file.toLowerCase().endsWith('.xlsx') || 
-              file.toLowerCase().endsWith('.xls') || 
-              file.toLowerCase().endsWith('.xlsm')
-            );
-            
-            if (excelFiles.length > 0) {
-              console.log(`🔍 Found Excel files in ${dir}:`, excelFiles);
-              // Use the most recent Excel file
-              const mostRecentFile = excelFiles[excelFiles.length - 1];
-              correctFilePath = path.join(dir, mostRecentFile);
-              console.log(`✅ Using most recent Excel file: ${mostRecentFile}`);
-              break;
+            console.log(`✅ Directory exists: ${dir}`);
+            try {
+              const files = fs.readdirSync(dir);
+              console.log(`📁 Files in ${dir}:`, files);
+              const excelFiles = files.filter(file => 
+                file.toLowerCase().endsWith('.xlsx') || 
+                file.toLowerCase().endsWith('.xls') || 
+                file.toLowerCase().endsWith('.xlsm')
+              );
+              
+              console.log(`📊 Excel files found in ${dir}:`, excelFiles);
+              
+              if (excelFiles.length > 0) {
+                console.log(`🔍 Found Excel files in ${dir}:`, excelFiles);
+                // Use the most recent Excel file
+                const mostRecentFile = excelFiles[excelFiles.length - 1];
+                correctFilePath = path.join(dir, mostRecentFile);
+                console.log(`✅ Using most recent Excel file: ${mostRecentFile}`);
+                break;
+              }
+            } catch (error) {
+              console.error(`❌ Error reading directory ${dir}:`, error.message);
             }
+          } else {
+            console.log(`❌ Directory does not exist: ${dir}`);
           }
         }
       }
       
       if (!correctFilePath) {
-        throw new Error(`Excel file not found: ${path.basename(filePath)}`);
+        console.error(`❌ No Excel files found in any upload directories`);
+        console.error(`🔍 This suggests the file upload process may not be working correctly on Railway`);
+        console.error(`🔍 The order was created with filename: ${path.basename(filePath)}`);
+        console.error(`🔍 But no matching file was found in the filesystem`);
+        
+        // For debugging, let's check if we can create a test file
+        const testDir = path.join(process.cwd(), 'uploads', 'orders');
+        if (!fs.existsSync(testDir)) {
+          console.log(`🔧 Creating test directory: ${testDir}`);
+          fs.mkdirSync(testDir, { recursive: true });
+        }
+        
+        throw new Error(`Excel file not found: ${path.basename(filePath)}. No Excel files found in any upload directories.`);
       }
       
       filePath = correctFilePath;
