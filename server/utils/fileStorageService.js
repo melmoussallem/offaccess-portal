@@ -19,15 +19,15 @@ class FileStorageService {
       // Since service account key creation is disabled, we'll use OAuth2 credentials
       console.log('🔑 Service account keys disabled, using OAuth2 credentials...');
       
-      if (process.env.GOOGLE_OAUTH2_CLIENT_ID && process.env.GOOGLE_OAUTH2_CLIENT_SECRET && process.env.GOOGLE_OAUTH2_REFRESH_TOKEN) {
+      if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_REFRESH_TOKEN) {
         console.log('🔑 Using OAuth2 credentials for Google Cloud Storage');
         
         const { GoogleAuth } = require('google-auth-library');
         
         const auth = new GoogleAuth({
-          clientId: process.env.GOOGLE_OAUTH2_CLIENT_ID,
-          clientSecret: process.env.GOOGLE_OAUTH2_CLIENT_SECRET,
-          refreshToken: process.env.GOOGLE_OAUTH2_REFRESH_TOKEN,
+          clientId: process.env.GOOGLE_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
           scopes: [
             'https://www.googleapis.com/auth/cloud-platform',
             'https://www.googleapis.com/auth/devstorage.full_control'
@@ -42,9 +42,9 @@ class FileStorageService {
       } else {
         console.error('❌ OAuth2 credentials not found. Please check your Railway environment variables.');
         console.log('🔍 Required variables:');
-        console.log('  - GOOGLE_OAUTH2_CLIENT_ID:', !!process.env.GOOGLE_OAUTH2_CLIENT_ID);
-        console.log('  - GOOGLE_OAUTH2_CLIENT_SECRET:', !!process.env.GOOGLE_OAUTH2_CLIENT_SECRET);
-        console.log('  - GOOGLE_OAUTH2_REFRESH_TOKEN:', !!process.env.GOOGLE_OAUTH2_REFRESH_TOKEN);
+        console.log('  - GOOGLE_CLIENT_ID:', !!process.env.GOOGLE_CLIENT_ID);
+        console.log('  - GOOGLE_CLIENT_SECRET:', !!process.env.GOOGLE_CLIENT_SECRET);
+        console.log('  - GOOGLE_REFRESH_TOKEN:', !!process.env.GOOGLE_REFRESH_TOKEN);
         console.log('⚠️ Using default authentication');
       }
       
