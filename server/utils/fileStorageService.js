@@ -45,9 +45,7 @@ class FileStorageService {
         console.log('  - GOOGLE_OAUTH2_CLIENT_ID:', !!process.env.GOOGLE_OAUTH2_CLIENT_ID);
         console.log('  - GOOGLE_OAUTH2_CLIENT_SECRET:', !!process.env.GOOGLE_OAUTH2_CLIENT_SECRET);
         console.log('  - GOOGLE_OAUTH2_REFRESH_TOKEN:', !!process.env.GOOGLE_OAUTH2_REFRESH_TOKEN);
-      }
-      } else {
-        console.log('⚠️ No OAuth2 credentials found, using default authentication');
+        console.log('⚠️ Using default authentication');
       }
       
       console.log('🔧 Creating Storage instance with config:', Object.keys(storageConfig));
