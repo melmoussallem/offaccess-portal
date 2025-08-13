@@ -8,7 +8,13 @@ const getUploadFilePath = (filename) => {
   const paths = [
     path.join(process.cwd(), 'uploads', 'orders', filename),
     path.join(__dirname, '..', '..', 'uploads', 'orders', filename),
-    path.join('/app', 'uploads', 'orders', filename)
+    path.join('/app', 'uploads', 'orders', filename),
+    path.join(process.cwd(), 'uploads', filename),
+    path.join(__dirname, '..', '..', 'uploads', filename),
+    path.join('/app', 'uploads', filename),
+    path.join(process.cwd(), 'uploads', 'catalogue', filename),
+    path.join(__dirname, '..', '..', 'uploads', 'catalogue', filename),
+    path.join('/app', 'uploads', 'catalogue', filename)
   ];
   
   for (const filePath of paths) {
@@ -19,6 +25,8 @@ const getUploadFilePath = (filename) => {
   }
   
   console.error(`❌ File not found in any of the expected paths: ${filename}`);
+  console.error(`🔍 Searched paths:`);
+  paths.forEach(p => console.error(`   - ${p}`));
   return null;
 };
 
