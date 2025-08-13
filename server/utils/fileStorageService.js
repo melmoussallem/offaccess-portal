@@ -86,7 +86,8 @@ class FileStorageService {
       const filePath = folder ? `${folder}/${fileName}` : fileName;
       const file = this.bucket.file(filePath);
 
-      const [result] = await file.save(fileBuffer, {
+      // Upload the file
+      await file.save(fileBuffer, {
         metadata: {
           contentType: contentType,
           cacheControl: 'public, max-age=31536000', // 1 year cache
