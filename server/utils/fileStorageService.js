@@ -22,21 +22,25 @@ class FileStorageService {
       if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_REFRESH_TOKEN) {
         console.log('🔑 Using OAuth2 credentials for Google Cloud Storage');
         
-        const { GoogleAuth } = require('google-auth-library');
-        
-        const auth = new GoogleAuth({
-          clientId: process.env.GOOGLE_CLIENT_ID,
-          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-          refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
-          scopes: [
-            'https://www.googleapis.com/auth/cloud-platform',
-            'https://www.googleapis.com/auth/devstorage.full_control'
-          ]
-        });
-        
-        storageConfig = {
-          auth: auth
+        // Create OAuth2 credentials object
+        const credentials = {
+          type: 'authorized_user',
+          client_id: process.env.GOOGLE_CLIENT_ID,
+          client_secret: process.env.GOOGLE_CLIENT_SECRET,
+          refresh_token: process.env.GOOGLE_REFRESH_TOKEN
         };
+        
+        // Create a temporary credentials file
+        const tempCredentialsPath = path.join(os.tmpdir(), `gcs-oauth2-credentials-${Date.now()}.json`);
+        fs.writeFileSync(tempCredentialsPath, JSON.stringify(credentials, null, 2));
+        
+        console.log('🔑 Created temporary OAuth2 credentials file:', tempCredentialsPath);
+        
+        // Set the environment variable to point to the temporary file
+        process.env.GOOGLE_APPLICATION_CREDENTIALS = tempCredentialsPath;
+        
+        // Use default configuration which will now read from the file
+        storageConfig = {};
         
         console.log('🔑 OAuth2 authentication configured successfully');
       } else {
