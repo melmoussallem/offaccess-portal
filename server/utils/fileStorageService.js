@@ -7,13 +7,28 @@ class FileStorageService {
     console.log('📦 Bucket name:', process.env.GOOGLE_CLOUD_STORAGE_BUCKET || 'offaccess-portal-files');
     
     try {
-      this.storage = new Storage();
+      // Initialize Storage with service account credentials
+      let storageConfig = {};
+      
+      if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+        console.log('🔑 Using service account credentials from environment variable');
+        const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+        storageConfig = {
+          credentials: credentials,
+          projectId: credentials.project_id
+        };
+      } else {
+        console.log('⚠️ No service account credentials found, using default authentication');
+      }
+      
+      this.storage = new Storage(storageConfig);
       this.bucketName = process.env.GOOGLE_CLOUD_STORAGE_BUCKET || 'offaccess-portal-files';
       this.bucket = this.storage.bucket(this.bucketName);
       this.baseUrl = `https://storage.googleapis.com/${this.bucketName}`;
       
       console.log('✅ FileStorageService initialized successfully');
       console.log('🌐 Base URL:', this.baseUrl);
+      console.log('📦 Bucket:', this.bucketName);
     } catch (error) {
       console.error('❌ Error initializing FileStorageService:', error);
       throw error;
