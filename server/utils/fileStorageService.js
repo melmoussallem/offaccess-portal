@@ -3,10 +3,21 @@ const path = require('path');
 
 class FileStorageService {
   constructor() {
-    this.storage = new Storage();
-    this.bucketName = process.env.GOOGLE_CLOUD_STORAGE_BUCKET || 'offaccess-portal-files';
-    this.bucket = this.storage.bucket(this.bucketName);
-    this.baseUrl = `https://storage.googleapis.com/${this.bucketName}`;
+    console.log('🔧 Initializing FileStorageService...');
+    console.log('📦 Bucket name:', process.env.GOOGLE_CLOUD_STORAGE_BUCKET || 'offaccess-portal-files');
+    
+    try {
+      this.storage = new Storage();
+      this.bucketName = process.env.GOOGLE_CLOUD_STORAGE_BUCKET || 'offaccess-portal-files';
+      this.bucket = this.storage.bucket(this.bucketName);
+      this.baseUrl = `https://storage.googleapis.com/${this.bucketName}`;
+      
+      console.log('✅ FileStorageService initialized successfully');
+      console.log('🌐 Base URL:', this.baseUrl);
+    } catch (error) {
+      console.error('❌ Error initializing FileStorageService:', error);
+      throw error;
+    }
   }
 
   /**
@@ -90,6 +101,24 @@ class FileStorageService {
         error: error.message
       };
     }
+  }
+
+  /**
+   * Generate a unique filename with timestamp and random ID
+   * @param {string} originalName - Original filename
+   * @param {string} prefix - Prefix for the filename (e.g., 'order-', 'invoice-')
+   * @returns {string} Unique filename
+   */
+  generateUniqueFileName(originalName, prefix = '') {
+    const timestamp = Date.now();
+    const randomId = Math.floor(Math.random() * 1000000000);
+    const fileExtension = path.extname(originalName);
+    const baseName = path.basename(originalName, fileExtension);
+    
+    // Clean the base name (remove special characters)
+    const cleanBaseName = baseName.replace(/[^a-zA-Z0-9]/g, '_');
+    
+    return `${prefix}${cleanBaseName}_${timestamp}_${randomId}${fileExtension}`;
   }
 
   /**

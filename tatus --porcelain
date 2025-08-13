@@ -1,0 +1,8 @@
+server/index.js
+server/models/StockFile.js
+server/routes/catalogue.js
+server/routes/test.js
+server/utils/fileStorageService.js
+tatus
+test-railway-deployment.js
+test-railway-gcs.js

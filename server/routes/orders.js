@@ -394,10 +394,20 @@ router.post('/', auth, upload.single('excelFile'), async (req, res) => {
                        String(Math.floor(Math.random() * 1000)).padStart(3, '0');
 
               // Extract data from the uploaded Excel file (memory buffer)
+      console.log('📁 Processing uploaded file:', {
+        originalName: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size
+      });
+      
       const { totalQuantity, totalAmount } = extractExcelDataFromBuffer(req.file.buffer, req.file.originalname);
+      console.log('📊 Extracted Excel data:', { totalQuantity, totalAmount });
 
       // Upload file to Google Cloud Storage
+      console.log('☁️ Uploading file to Google Cloud Storage...');
       const fileName = fileStorageService.generateUniqueFileName(req.file.originalname, 'order-');
+      console.log('📝 Generated filename:', fileName);
+      
       const uploadResult = await fileStorageService.uploadFile(
         req.file.buffer,
         fileName,
@@ -405,8 +415,11 @@ router.post('/', auth, upload.single('excelFile'), async (req, res) => {
         'orders'
       );
 
+      console.log('☁️ Upload result:', uploadResult);
+
       if (!uploadResult.success) {
-        return res.status(500).json({ error: 'Failed to upload file to cloud storage' });
+        console.error('❌ Failed to upload file to cloud storage:', uploadResult.error);
+        return res.status(500).json({ error: 'Failed to upload file to cloud storage: ' + uploadResult.error });
       }
 
       // Convert file to base64 for backup (optional - can be removed after migration)

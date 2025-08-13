@@ -1,0 +1,5 @@
+[33m9d281a8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Add GCS environment variables guide and test script
+[33me5d457f[m Implement comprehensive Google Cloud Storage migration for all file operations
+[33me6681d4[m Add debugging logs to download route to diagnose file download issues
+[33m198b55d[m Fix invoice file filename generation for memory storage
+[33mfa4bb1b[m Add invoice file debugging during order approval save process
