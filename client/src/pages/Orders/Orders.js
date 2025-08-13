@@ -170,6 +170,17 @@ const Orders = () => {
       const data = await response.json();
       console.log('📋 Orders loaded:', data.length, 'orders');
       console.log('📋 First order status:', data[0]?.status);
+      
+      // Debug: Log inventory status for all orders
+      data.forEach(order => {
+        console.log(`📋 Order ${order.orderNumber}:`, {
+          status: order.status,
+          invoiceFile: order.invoiceFile,
+          inventoryStatus: order.inventoryStatus,
+          inventoryDeducted: order.inventoryDeducted
+        });
+      });
+      
       setOrders(data);
     } catch (err) {
       console.error('❌ Error loading orders:', err.message);
@@ -1598,8 +1609,17 @@ const Orders = () => {
   const getInventoryStatusDisplay = (order, isHeader = true) => {
     if (!isAdmin) return null;
     
+    // Debug logging
+    console.log('🔍 Inventory Status Debug for order:', order.orderNumber, {
+      invoiceFile: order.invoiceFile,
+      inventoryStatus: order.inventoryStatus,
+      inventoryDeducted: order.inventoryDeducted,
+      inventoryDeductionDate: order.inventoryDeductionDate
+    });
+    
     // Check if order has been approved (has invoice file)
     if (!order.invoiceFile) {
+      console.log('❌ No invoice file - showing "Not Deducted"');
       return (
         <Chip
           icon={<InfoIcon sx={{ color: '#FFFFFF' }} />}
@@ -1615,8 +1635,10 @@ const Orders = () => {
     }
     
     // Check inventory status based on the new status field
+    console.log('✅ Has invoice file, checking inventory status:', order.inventoryStatus);
     switch (order.inventoryStatus) {
       case 'success':
+        console.log('✅ Inventory status is SUCCESS - showing "Deducted"');
         // Only show reverse inventory button if order is cancelled and inventory hasn't been restored
         const canReverseInventory = order.status === 'Cancelled' && !order.inventoryRestored;
         
@@ -1688,6 +1710,7 @@ const Orders = () => {
         
       case 'not_applicable':
       default:
+        console.log('❌ Inventory status is NOT_APPLICABLE or DEFAULT - showing "Not Deducted"');
         return (
           <Chip
             icon={<InfoIcon sx={{ color: '#FFFFFF' }} />}
