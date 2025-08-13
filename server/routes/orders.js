@@ -75,7 +75,7 @@ const extractExcelDataFromBuffer = (buffer, originalname) => {
 
 // Helper function to extract data from workbook
 const extractExcelDataFromWorkbook = (workbook) => {
-    
+  try {
     console.log('Available sheets:', workbook.SheetNames);
     
     // Try to find the 'Buyer Order Form' sheet first, then fall back to first sheet
@@ -384,12 +384,11 @@ router.post('/', auth, upload.single('excelFile'), async (req, res) => {
     const orderNumber = 'ORD-' + new Date().toISOString().slice(0, 10).replace(/-/g, '') + '-' + 
                        String(Math.floor(Math.random() * 1000)).padStart(3, '0');
 
-    // Extract data from the uploaded Excel file
-    const { totalQuantity, totalAmount } = extractExcelData(req.file.path);
+         // Extract data from the uploaded Excel file (memory buffer)
+     const { totalQuantity, totalAmount } = extractExcelDataFromBuffer(req.file.buffer, req.file.originalname);
 
-    // Convert file to base64
-    const fileBuffer = fs.readFileSync(req.file.path);
-    const base64File = fileBuffer.toString('base64');
+     // Convert file to base64
+     const base64File = req.file.buffer.toString('base64');
 
     // Debug: Log the orderBuyer object before creating order data
     console.log('Final orderBuyer object:', {
@@ -602,9 +601,8 @@ router.put('/:id/approve', auth, upload.single('invoiceFile'), async (req, res) 
     }
     // === END INVENTORY DEDUCTION ===
 
-    // Convert invoice file to base64 for backup
-    const invoiceFileBuffer = fs.readFileSync(req.file.path);
-    const invoiceBase64 = invoiceFileBuffer.toString('base64');
+         // Convert invoice file to base64 for backup
+     const invoiceBase64 = req.file.buffer.toString('base64');
 
     // Update order status and save invoice
     order.status = 'Awaiting Payment';
@@ -1215,23 +1213,9 @@ router.put('/:id/reverse-inventory', auth, async (req, res) => {
   }
 });
 
-// Custom storage for replace-attachment to preserve original filename
-const replaceAttachmentStorage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const uploadDir = 'uploads/orders';
-    if (!fs.existsSync(uploadDir)) {
-      fs.mkdirSync(uploadDir, { recursive: true });
-    }
-    cb(null, uploadDir);
-  },
-  filename: function (req, file, cb) {
-    // Keep the original filename
-    cb(null, file.originalname);
-  }
-});
-
+// Custom multer for replace-attachment (using memory storage for Railway compatibility)
 const replaceAttachmentUpload = multer({ 
-  storage: replaceAttachmentStorage,
+  storage: multer.memoryStorage(),
   fileFilter: (req, file, cb) => {
     const allowedTypes = ['.xlsx', '.xls', '.xlsm', '.pdf'];
     const ext = path.extname(file.originalname).toLowerCase();
@@ -1274,14 +1258,12 @@ router.put('/:id/replace-attachment', auth, replaceAttachmentUpload.single('exce
       }
     }
 
-    // Extract data from new Excel file
-    const newFilePath = path.resolve(req.file.path);
-    console.log(`Reading file from: ${newFilePath}`);
-    const excelData = extractExcelData(newFilePath);
+         // Extract data from new Excel file (memory buffer)
+     console.log(`Reading file from buffer: ${req.file.originalname}`);
+     const excelData = extractExcelDataFromBuffer(req.file.buffer, req.file.originalname);
 
-    // Convert file to base64 and save original name
-    const fileBuffer = fs.readFileSync(newFilePath);
-    const base64File = fileBuffer.toString('base64');
+     // Convert file to base64 and save original name
+     const base64File = req.file.buffer.toString('base64');
 
     // Update order with new file and data
     order.excelFile = req.file.filename;
@@ -1344,10 +1326,9 @@ router.put('/:id/admin-replace-attachment', auth, replaceAttachmentUpload.single
       }
     }
 
-    // Extract data from new Excel file
-    const newFilePath = path.resolve(req.file.path);
-    console.log(`Reading file from: ${newFilePath}`);
-    const excelData = extractExcelData(newFilePath);
+         // Extract data from new Excel file (memory buffer)
+     console.log(`Reading file from buffer: ${req.file.originalname}`);
+     const excelData = extractExcelDataFromBuffer(req.file.buffer, req.file.originalname);
     
     // Update order with new file and data
     order.excelFile = req.file.filename;
