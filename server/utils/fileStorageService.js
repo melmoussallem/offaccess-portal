@@ -16,51 +16,38 @@ class FileStorageService {
       console.log('🔍 GOOGLE_APPLICATION_CREDENTIALS_JSON exists:', !!process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
       console.log('🔍 GOOGLE_APPLICATION_CREDENTIALS_JSON length:', process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON ? process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON.length : 0);
       
-      if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
-        console.log('🔑 Using service account credentials from environment variable');
-        try {
-          const credentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
-          console.log('🔑 Parsed credentials successfully');
-          console.log('🔑 Project ID:', credentials.project_id);
-          console.log('🔑 Client email:', credentials.client_email);
-          
-          // Create a temporary credentials file
-          const tempCredentialsPath = path.join(os.tmpdir(), `gcs-credentials-${Date.now()}.json`);
-          fs.writeFileSync(tempCredentialsPath, JSON.stringify(credentials, null, 2));
-          
-          console.log('🔑 Created temporary credentials file:', tempCredentialsPath);
-          
-          // Set the environment variable to point to the temporary file
-          process.env.GOOGLE_APPLICATION_CREDENTIALS = tempCredentialsPath;
-          
-          // Use default configuration which will now read from the file
-          storageConfig = {};
-          
-        } catch (parseError) {
-          console.error('❌ Error parsing service account credentials:', parseError.message);
-          console.log('🔍 Credentials preview:', process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON.substring(0, 100) + '...');
-        }
-      } else {
-        console.log('⚠️ No service account credentials found, trying OAuth2 credentials...');
+      // Since service account key creation is disabled, we'll use OAuth2 credentials
+      console.log('🔑 Service account keys disabled, using OAuth2 credentials...');
+      
+      if (process.env.GOOGLE_OAUTH2_CLIENT_ID && process.env.GOOGLE_OAUTH2_CLIENT_SECRET && process.env.GOOGLE_OAUTH2_REFRESH_TOKEN) {
+        console.log('🔑 Using OAuth2 credentials for Google Cloud Storage');
         
-        // Try to use OAuth2 credentials if available
-        if (process.env.GOOGLE_OAUTH2_CLIENT_ID && process.env.GOOGLE_OAUTH2_CLIENT_SECRET && process.env.GOOGLE_OAUTH2_REFRESH_TOKEN) {
-          console.log('🔑 Using OAuth2 credentials');
-          const { GoogleAuth } = require('google-auth-library');
-          
-          const auth = new GoogleAuth({
-            clientId: process.env.GOOGLE_OAUTH2_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_OAUTH2_CLIENT_SECRET,
-            refreshToken: process.env.GOOGLE_OAUTH2_REFRESH_TOKEN,
-            scopes: ['https://www.googleapis.com/auth/cloud-platform']
-          });
-          
-          storageConfig = {
-            auth: auth
-          };
-        } else {
-          console.log('⚠️ No OAuth2 credentials found either, using default authentication');
-        }
+        const { GoogleAuth } = require('google-auth-library');
+        
+        const auth = new GoogleAuth({
+          clientId: process.env.GOOGLE_OAUTH2_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_OAUTH2_CLIENT_SECRET,
+          refreshToken: process.env.GOOGLE_OAUTH2_REFRESH_TOKEN,
+          scopes: [
+            'https://www.googleapis.com/auth/cloud-platform',
+            'https://www.googleapis.com/auth/devstorage.full_control'
+          ]
+        });
+        
+        storageConfig = {
+          auth: auth
+        };
+        
+        console.log('🔑 OAuth2 authentication configured successfully');
+      } else {
+        console.error('❌ OAuth2 credentials not found. Please check your Railway environment variables.');
+        console.log('🔍 Required variables:');
+        console.log('  - GOOGLE_OAUTH2_CLIENT_ID:', !!process.env.GOOGLE_OAUTH2_CLIENT_ID);
+        console.log('  - GOOGLE_OAUTH2_CLIENT_SECRET:', !!process.env.GOOGLE_OAUTH2_CLIENT_SECRET);
+        console.log('  - GOOGLE_OAUTH2_REFRESH_TOKEN:', !!process.env.GOOGLE_OAUTH2_REFRESH_TOKEN);
+      }
+      } else {
+        console.log('⚠️ No OAuth2 credentials found, using default authentication');
       }
       
       console.log('🔧 Creating Storage instance with config:', Object.keys(storageConfig));
