@@ -973,6 +973,10 @@ router.get('/:id/download/:fileType', auth, async (req, res) => {
 
     // Debug logging
     console.log(`[DOWNLOAD] Order: ${order.orderNumber}, fileType: ${fileType}, filename: ${filename}, originalName: ${originalName}`);
+    console.log(`[DOWNLOAD] Base64 data present: ${!!base64Data}, Base64 length: ${base64Data ? base64Data.length : 0}`);
+    console.log(`[DOWNLOAD] File path: ${filePath}`);
+    console.log(`[DOWNLOAD] File exists on disk: ${fs.existsSync(filePath)}`);
+    
     if (base64Data) {
       console.log(`[DOWNLOAD] Serving from base64 for order ${order.orderNumber}`);
       const buffer = Buffer.from(base64Data, 'base64');
