@@ -78,12 +78,12 @@ const Logo = ({
   // For stacked layout (login page)
   if (stacked) {
     return (
-      <Box sx={stackedStyles}>
-        {/* Icon on top */}
+      <Box sx={{ ...stackedStyles, gap: 1 }}>
+        {/* Icon on top - half the size */}
         <img 
           src="/Off Access Icon.png" 
           alt="Off Access Icon" 
-          style={{ ...imageStyles, width: imageStyles.width * 0.6, height: imageStyles.height * 0.6 }}
+          style={{ ...imageStyles, width: imageStyles.width * 0.5, height: imageStyles.height * 0.5 }}
           onError={(e) => {
             e.target.style.display = 'none';
           }}
@@ -101,23 +101,7 @@ const Logo = ({
             }
           }}
         />
-        {showText && (
-          <Typography 
-            variant={getTextSize()} 
-            component="span"
-            sx={{ 
-              fontWeight: 600,
-              color: variant === 'white' ? 'white' : 'primary.main',
-              display: 'none', // Hidden by default, shown if image fails
-              '&.fallback': {
-                display: 'block'
-              }
-            }}
-            className="fallback"
-          >
-            Off Access
-          </Typography>
-        )}
+        {/* No text fallback for stacked layout */}
       </Box>
     );
   }
