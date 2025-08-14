@@ -350,7 +350,7 @@ const Login = () => {
             className="login-paper"
             elevation={0}
             sx={{
-              p: { xs: 2, sm: 3, lg: 4 },
+              p: { xs: 1.5, sm: 2, lg: 3 },
               width: '100%',
               maxWidth: 400,
               borderRadius: 4,
@@ -370,7 +370,7 @@ const Login = () => {
             }}
           >
             {/* Header */}
-            <Box textAlign="center" mb={1}>
+            <Box textAlign="center" mb={0.5}>
               <Logo size="xlarge" sx={{ mb: 0 }} type="logo" variant="black" stacked={true} />
               <Typography
                 variant="h4"
