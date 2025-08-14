@@ -214,7 +214,7 @@ const Layout = () => {
           
           {/* Icon */}
           <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-            <Logo size="small" type="icon" />
+            <Logo size="small" type="icon" showText={false} />
           </Box>
           
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
