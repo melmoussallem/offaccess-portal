@@ -378,7 +378,7 @@ const Login = () => {
                 sx={{
                   color: '#1976d2',
                   fontWeight: 700,
-                  mb: 15,
+                  mb: 25,
                   fontSize: { xs: '1.75rem', sm: '2rem' }
                 }}
               >
