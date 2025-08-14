@@ -1,5 +1,14 @@
 const nodemailer = require('nodemailer');
 
+// Logo HTML template
+const logoHtml = `
+  <div style="text-align: center; margin-bottom: 30px; padding: 20px 0;">
+    <img src="https://portal.offaccess.com/logo.svg" alt="OffAccess Logo" style="height: 60px; width: auto; margin-bottom: 10px;">
+    <h1 style="color: #1976d2; margin: 0; font-size: 24px; font-weight: 600;">OffAccess</h1>
+    <p style="color: #666; margin: 5px 0 0 0; font-size: 14px;">Digital Wholesale Catalogue</p>
+  </div>
+`;
+
 // Create transporter
 const transporter = nodemailer.createTransport(
   process.env.SMTP_HOST ? {
@@ -26,9 +35,7 @@ const emailTemplates = {
     subject: 'Registration Confirmation - Digital Wholesale Catalogue',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #333; margin: 0;">Digital Wholesale Catalogue</h1>
-        </div>
+        ${logoHtml}
         <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">Welcome to Digital Wholesale Catalogue</h2>
         <p>Dear ${user.name},</p>
         <p>Thank you for registering with our Digital Wholesale Catalogue. Your application has been received and is currently under review by our team.</p>
@@ -62,9 +69,7 @@ const emailTemplates = {
         subject: 'Application Approved - Digital Wholesale Catalogue',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-            <div style="text-align: center; margin-bottom: 30px;">
-              <h1 style="color: #333; margin: 0;">Digital Wholesale Catalogue</h1>
-            </div>
+            ${logoHtml}
             <h2 style="color: #28a745; border-bottom: 2px solid #28a745; padding-bottom: 10px;">🎉 Application Approved!</h2>
             <p>Dear ${name},</p>
             <p>Great news! Your application has been approved. You can now access our wholesale catalogue and start placing orders.</p>
@@ -94,9 +99,7 @@ const emailTemplates = {
         subject: 'Application Status - Digital Wholesale Catalogue',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-            <div style="text-align: center; margin-bottom: 30px;">
-              <h1 style="color: #333; margin: 0;">Digital Wholesale Catalogue</h1>
-            </div>
+            ${logoHtml}
             <h2 style="color: #dc3545; border-bottom: 2px solid #dc3545; padding-bottom: 10px;">Application Update</h2>
             <p>Dear ${name},</p>
             <p>We regret to inform you that your application has not been approved at this time.</p>

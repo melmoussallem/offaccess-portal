@@ -30,6 +30,7 @@ import {
 import { useAuth } from '../../contexts/AuthContext';
 import NotificationDropdown from '../Notifications/NotificationDropdown';
 import Chat from '../Chat/Chat';
+import Logo from '../../components/Logo';
 
 const drawerWidth = 280;
 
@@ -135,14 +136,14 @@ const Layout = () => {
           textAlign: 'center'
         }}
       >
-        <Typography variant="h5" component="h1" fontWeight="bold" color="primary">
+        <Logo size="large" sx={{ mb: 2 }} />
+        <Typography variant="h6" component="h1" fontWeight="bold" color="primary" sx={{ mb: 1 }}>
           Digital Wholesale Catalogue
         </Typography>
         <Chip
           label={user?.role === 'admin' ? 'Administrator' : 'Buyer'}
           size="small"
           color={user?.role === 'admin' ? 'primary' : 'secondary'}
-          sx={{ mt: 1 }}
         />
       </Box>
 
@@ -210,6 +211,11 @@ const Layout = () => {
           >
             <MenuIcon />
           </IconButton>
+          
+          {/* Logo */}
+          <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
+            <Logo size="small" showText={false} />
+          </Box>
           
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             {menuItems.find(item => isActive(item.path))?.text || 'Dashboard'}

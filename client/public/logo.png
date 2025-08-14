@@ -1,0 +1,38 @@
+# Logo Placeholder
+
+This is a placeholder for your company logo.
+
+## How to Add Your Logo:
+
+1. **Replace this file** with your actual logo image
+2. **Recommended format**: PNG with transparent background
+3. **Recommended size**: 200x200 pixels minimum
+4. **File name**: Keep as `logo.png`
+
+## Logo Specifications:
+
+- **Format**: PNG (preferred) or SVG
+- **Background**: Transparent
+- **Size**: 200x200px minimum, 400x400px recommended
+- **Color**: Should work on both light and dark backgrounds
+- **File size**: Under 100KB for fast loading
+
+## Where the Logo Appears:
+
+✅ **Frontend UI**:
+- Header navigation bar (small size)
+- Sidebar (large size)
+- Login page (extra large size)
+
+✅ **Email Notifications**:
+- All email templates
+- Order confirmations
+- Status updates
+
+## Alternative: Use Text Logo
+
+If you don't have a logo image, the system will automatically fall back to a text-based logo showing "OffAccess".
+
+---
+
+**Note**: After adding your logo, restart the application to see the changes.
