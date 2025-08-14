@@ -20,7 +20,7 @@ const Logo = ({
       case 'large':
         return { width: 64, height: 64 };
       case 'xlarge':
-        return { width: 100, height: 80 };
+        return { width: 150, height: 120 };
       default:
         return { width: 48, height: 48 };
     }
@@ -79,16 +79,7 @@ const Logo = ({
   if (stacked) {
     return (
       <Box sx={{ ...stackedStyles, gap: 0 }}>
-        {/* Icon on top - smaller size */}
-        <img 
-          src="/Off Access Icon.png" 
-          alt="Off Access Icon" 
-          style={{ ...imageStyles, width: imageStyles.width * 0.35, height: imageStyles.height * 0.35, marginBottom: '-10px' }}
-          onError={(e) => {
-            e.target.style.display = 'none';
-          }}
-        />
-        {/* Logo below */}
+        {/* Logo only - no icon */}
         <img 
           src={getAssetSrc()} 
           alt="Off Access Logo" 
