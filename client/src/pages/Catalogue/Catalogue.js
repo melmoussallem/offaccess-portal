@@ -42,12 +42,10 @@ import {
   Security as SecurityIcon,
   Add as AddIcon,
   CloudUpload as CloudUploadIcon,
-  Visibility as VisibilityIcon,
-  Link as LinkIcon,
   Folder as FolderIcon,
 } from '@mui/icons-material';
 import { useAuth } from '../../contexts/AuthContext';
-import GoogleSheetPreview from './GoogleSheetPreview';
+
 import { getApiUrl } from '../../config/api';
 
 const ExcelSvgIcon = (props) => (
@@ -111,18 +109,7 @@ export default function Catalogue() {
   const fileInputRef = React.useRef();
   const replacementFileInputRef = React.useRef();
   
-  // Google Sheet preview states
-  const [showGoogleSheetDialog, setShowGoogleSheetDialog] = useState(false);
-  const [selectedFileForGoogleSheet, setSelectedFileForGoogleSheet] = useState(null);
-  const [googleSheetUrl, setGoogleSheetUrl] = useState('');
-  const [updatingGoogleSheet, setUpdatingGoogleSheet] = useState(false);
-  
-  // Google Sheet preview modal states
-  const [previewModalOpen, setPreviewModalOpen] = useState(false);
-  const [previewFile, setPreviewFile] = useState(null);
-  
-  // Add state for preview error snackbar
-  const [showPreviewError, setShowPreviewError] = useState(false);
+
   
   // Add state for replace attachment dialog
   const [showReplaceAttachmentDialog, setShowReplaceAttachmentDialog] = useState(false);
@@ -660,51 +647,7 @@ export default function Catalogue() {
     }
   };
 
-  const handleSetGoogleSheetUrl = (file) => {
-    setSelectedFileForGoogleSheet(file);
-    setGoogleSheetUrl(file.googleSheetUrl || '');
-    openDialog(setShowGoogleSheetDialog);
-  };
 
-  const handleSaveGoogleSheetUrl = async () => {
-    if (!selectedFileForGoogleSheet) {
-      setMessage('No file selected');
-      setSeverity('error');
-      setShowMessage(true);
-      return;
-    }
-
-    try {
-      setUpdatingGoogleSheet(true);
-      const response = await fetch(getApiUrl(`api/catalogue/${selectedBrand._id}/stock-file/${selectedFileForGoogleSheet._id}/google-sheet`), {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ googleSheetUrl: googleSheetUrl.trim() })
-      });
-
-      if (!response.ok) throw new Error('Failed to update Google Sheet URL');
-
-      setMessage('Google Sheet URL updated successfully');
-      setSeverity('success');
-      setShowMessage(true);
-      closeDialog(setShowGoogleSheetDialog);
-      setSelectedFileForGoogleSheet(null);
-      setGoogleSheetUrl('');
-      
-      // Refresh the stock files to show the updated data
-      await loadStockFiles(selectedBrand);
-    } catch (error) {
-      console.error('Error updating Google Sheet URL:', error);
-      setMessage('Failed to update Google Sheet URL');
-      setSeverity('error');
-      setShowMessage(true);
-    } finally {
-      setUpdatingGoogleSheet(false);
-    }
-  };
 
   const handleSaveBrandRename = async () => {
     if (!selectedBrandForMenu || !newBrandName.trim()) {
@@ -796,15 +739,7 @@ export default function Catalogue() {
     }
   };
 
-  const handleOpenPreviewModal = (file) => {
-    setPreviewFile(file);
-    setPreviewModalOpen(true);
-  };
 
-  const handleClosePreviewModal = () => {
-    setPreviewModalOpen(false);
-    setPreviewFile(null);
-  };
 
   useEffect(() => {
     loadBrands();
@@ -1146,22 +1081,7 @@ export default function Catalogue() {
                            </Box>
                           <CardActions sx={{ p: 3, pt: 0 }}>
                             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, width: '100%' }}>
-                              {/* Same layout for both admin and buyer - Preview and Download */}
-                              <Button
-                                variant="outlined"
-                                color="primary"
-                                size="small"
-                                startIcon={<VisibilityIcon />}
-                                onClick={() => stockFile.googleSheetUrl ? handleOpenPreviewModal(stockFile) : setShowPreviewError(true)}
-                                sx={{ 
-                                  width: '100%',
-                                  fontWeight: 500,
-                                  borderRadius: 2,
-                                  textTransform: 'none'
-                                }}
-                              >
-                                Preview
-                              </Button>
+                              {/* Download button only */}
                               <Tooltip 
                                 title="Download this file to place your order" 
                                 placement="bottom"
@@ -1750,80 +1670,7 @@ export default function Catalogue() {
         </DialogActions>
       </Dialog>
 
-      {/* Google Sheet URL Dialog */}
-      <Dialog 
-        open={showGoogleSheetDialog} 
-        onClose={() => {
-          closeDialog(setShowGoogleSheetDialog);
-          setSelectedFileForGoogleSheet(null);
-          setGoogleSheetUrl('');
-        }}
-        maxWidth="md"
-        fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius: 3,
-            boxShadow: '0 8px 25px rgba(0,0,0,0.15)'
-          }
-        }}
-      >
-        <DialogTitle sx={{ pb: 1 }}>
-          Set Google Sheet URL for {selectedFileForGoogleSheet?.originalName || selectedFileForGoogleSheet?.fileName}
-        </DialogTitle>
-        <DialogContent sx={{ pb: 2 }}>
-          <Box sx={{ mt: 2 }}>
-            <TextField
-              fullWidth
-              label="Google Sheet URL"
-              value={googleSheetUrl}
-              onChange={(e) => setGoogleSheetUrl(e.target.value)}
-              placeholder="https://docs.google.com/spreadsheets/d/..."
-              helperText="The URL should be from a Google Sheet that is published to the web"
-              sx={{ mb: 2, borderRadius: 2 }}
-            />
-            <Alert severity="info" sx={{ mb: 2, borderRadius: 2 }}>
-              <Typography variant="body2">
-                <strong>Instructions for setting up Google Sheet:</strong>
-              </Typography>
-              <Typography variant="body2" sx={{ mt: 1 }}>
-                1. Open your Google Sheet in Google Drive
-              </Typography>
-              <Typography variant="body2">
-                2. Go to File → Share → Publish to web
-              </Typography>
-              <Typography variant="body2">
-                3. Choose "Entire document" and "Web page"
-              </Typography>
-              <Typography variant="body2">
-                4. Click "Publish" and copy the URL
-              </Typography>
-              <Typography variant="body2">
-                5. Paste the URL above
-              </Typography>
-            </Alert>
-          </Box>
-        </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 3 }}>
-          <Button 
-            onClick={() => {
-              closeDialog(setShowGoogleSheetDialog);
-              setSelectedFileForGoogleSheet(null);
-              setGoogleSheetUrl('');
-            }}
-            sx={{ borderRadius: 2 }}
-          >
-            Cancel
-          </Button>
-          <Button 
-            onClick={handleSaveGoogleSheetUrl} 
-            variant="contained"
-            disabled={updatingGoogleSheet}
-            sx={{ borderRadius: 2 }}
-          >
-            {updatingGoogleSheet ? <CircularProgress size={20} /> : 'Save'}
-          </Button>
-        </DialogActions>
-      </Dialog>
+
 
       {/* Replace Attachment Dialog */}
       <Dialog 
@@ -1899,17 +1746,7 @@ export default function Catalogue() {
           }
         }}
       >
-        <MenuItem onClick={() => {
-          handleSetGoogleSheetUrl(selectedFileForMenu);
-          handleFileMenuClose();
-        }}>
-          <ListItemIcon>
-            <LinkIcon fontSize="small" />
-          </ListItemIcon>
-          <ListItemText>
-            {selectedFileForMenu?.googleSheetUrl ? 'Update Preview Link' : 'Add Preview Link'}
-          </ListItemText>
-        </MenuItem>
+
         <MenuItem onClick={() => {
           handleReplaceAttachment(selectedFileForMenu);
           handleFileMenuClose();
@@ -1941,14 +1778,7 @@ export default function Catalogue() {
         </MenuItem>
       </Menu>
 
-      {/* Google Sheet Preview Modal */}
-      <GoogleSheetPreview
-        open={previewModalOpen}
-        onClose={handleClosePreviewModal}
-        googleSheetUrl={previewFile?.googleSheetUrl}
-        fileName={previewFile?.originalName || previewFile?.fileName}
-        onDownloadClick={() => previewFile && handleDownload(previewFile)}
-      />
+
 
       {/* Snackbar for messages */}
       <Snackbar
@@ -1966,12 +1796,7 @@ export default function Catalogue() {
         </Alert>
       </Snackbar>
 
-      {/* Snackbar for preview error */}
-      <Snackbar open={showPreviewError} autoHideDuration={3000} onClose={() => setShowPreviewError(false)} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-        <Alert severity="info" onClose={() => setShowPreviewError(false)} sx={{ borderRadius: 2 }}>
-          Preview not available for this file yet.
-        </Alert>
-      </Snackbar>
+
     </Box>
   );
 } 
