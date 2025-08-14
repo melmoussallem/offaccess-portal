@@ -827,16 +827,51 @@ router.put('/replace-file/:fileId', authenticateToken, requireAdmin, upload.arra
     
     const newFile = req.files[0];
     
-    // Delete the old file
-    if (fs.existsSync(stockFile.filePath)) {
-      fs.unlinkSync(stockFile.filePath);
+    console.log('Replacing file in Google Cloud Storage:', {
+      fileId: fileId,
+      oldFilePath: stockFile.filePath,
+      newFileName: newFile.originalname,
+      newFileSize: newFile.size
+    });
+    
+    // Delete the old file from Google Cloud Storage
+    if (stockFile.filePath) {
+      try {
+        const deleteResult = await fileStorageService.deleteFile(stockFile.filePath);
+        if (deleteResult.success) {
+          console.log('✅ Old file deleted from GCS:', stockFile.filePath);
+        } else {
+          console.log('⚠️ Could not delete old file from GCS:', deleteResult.error);
+        }
+      } catch (deleteError) {
+        console.log('⚠️ Error deleting old file from GCS:', deleteError.message);
+      }
     }
     
+    // Generate unique filename for new file
+    const fileName = fileStorageService.generateUniqueFileName(newFile.originalname, 'catalogue-');
+    
+    // Upload new file to Google Cloud Storage
+    const uploadResult = await fileStorageService.uploadFile(
+      newFile.buffer,
+      fileName,
+      newFile.mimetype,
+      'catalogue'
+    );
+    
+    if (!uploadResult.success) {
+      console.error('Failed to upload replacement file to GCS:', uploadResult.error);
+      return res.status(500).json({ message: 'Failed to upload replacement file to cloud storage' });
+    }
+    
+    console.log('✅ Replacement file uploaded to GCS:', uploadResult.filePath);
+    
     // Update stockFile with new file info
-    const relativePath = path.relative(path.join(__dirname, '../../'), newFile.path);
-    stockFile.fileName = newFile.filename;
+    stockFile.fileName = fileName;
     stockFile.originalName = newFile.originalname;
-    stockFile.filePath = relativePath;
+    stockFile.filePath = uploadResult.filePath;
+    stockFile.fileSize = newFile.size;
+    stockFile.mimeType = newFile.mimetype;
     stockFile.uploadedAt = new Date();
     
     await stockFile.save();
