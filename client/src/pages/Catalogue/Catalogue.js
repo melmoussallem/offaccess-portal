@@ -1220,20 +1220,7 @@ export default function Catalogue() {
           </ListItemIcon>
           Download File
         </MenuItem>
-        {isAdmin() && (
-          <>
-            <Divider />
-            <MenuItem onClick={() => {
-              handleSetGoogleSheetUrl(selectedFileForMenu);
-              handleFileMenuClose();
-            }}>
-              <ListItemIcon>
-                <LinkIcon fontSize="small" />
-              </ListItemIcon>
-              {selectedFileForMenu?.googleSheetUrl ? 'Update Google Sheet URL' : 'Set Google Sheet URL'}
-            </MenuItem>
-          </>
-        )}
+
         <Divider />
         <MenuItem onClick={handleDeleteFile} sx={{ color: 'error.main' }}>
           <ListItemIcon>
