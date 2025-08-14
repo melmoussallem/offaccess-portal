@@ -44,12 +44,33 @@ class GoogleSheetsService {
       console.log('🔧 Initializing Google Sheets service...');
       console.log('🔧 Current working directory:', process.cwd());
       console.log('🔧 NODE_ENV:', process.env.NODE_ENV);
-      console.log('🔧 GOOGLE_DRIVE_KEY_FILE:', process.env.GOOGLE_DRIVE_KEY_FILE);
       
       let authConfig = {};
       
-      // Method 1: Try Workload Identity Federation first
-      if (process.env.GOOGLE_WORKLOAD_IDENTITY_PROJECT_ID) {
+      // Method 1: Try Service Account from environment variable (preferred)
+      if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+        console.log('🔧 Using Service Account from GOOGLE_APPLICATION_CREDENTIALS_JSON...');
+        try {
+          const serviceAccountCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+          console.log('🔑 Service account email:', serviceAccountCredentials.client_email);
+          console.log('🔑 Project ID:', serviceAccountCredentials.project_id);
+          
+          this.auth = new google.auth.GoogleAuth({
+            credentials: serviceAccountCredentials,
+            scopes: [
+              'https://www.googleapis.com/auth/spreadsheets',
+              'https://www.googleapis.com/auth/drive'
+            ]
+          });
+          
+          console.log('✅ Service Account authentication configured successfully');
+        } catch (error) {
+          console.error('❌ Failed to parse service account credentials:', error.message);
+          throw new Error('Invalid service account credentials format');
+        }
+      }
+      // Method 2: Try Workload Identity Federation
+      else if (process.env.GOOGLE_WORKLOAD_IDENTITY_PROJECT_ID) {
         console.log('🔧 Using Workload Identity Federation...');
         this.auth = new google.auth.GoogleAuth({
           scopes: [
@@ -58,7 +79,7 @@ class GoogleSheetsService {
           ]
         });
       }
-      // Method 2: Try Application Default Credentials (ADC)
+      // Method 3: Try Application Default Credentials (ADC)
       else if (process.env.GOOGLE_USE_ADC === 'true') {
         console.log('🔧 Using Application Default Credentials (ADC)...');
         this.auth = new google.auth.GoogleAuth({
@@ -68,9 +89,9 @@ class GoogleSheetsService {
           ]
         });
       }
-      // Method 2: Try OAuth2 Client (for personal accounts)
+      // Method 4: Try OAuth2 Client (legacy support)
       else if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
-        console.log('🔧 Using OAuth2 Client authentication...');
+        console.log('🔧 Using OAuth2 Client authentication (legacy)...');
         this.auth = new google.auth.OAuth2(
           process.env.GOOGLE_CLIENT_ID,
           process.env.GOOGLE_CLIENT_SECRET,
@@ -84,48 +105,14 @@ class GoogleSheetsService {
           });
         }
       }
-      // Method 3: Try Service Account (fallback)
-      else {
-        let credentials;
+      // Method 5: Try Service Account from file (fallback)
+      else if (process.env.GOOGLE_DRIVE_KEY_FILE) {
+        console.log('🔧 Using Google Drive key file from environment variable:', process.env.GOOGLE_DRIVE_KEY_FILE);
         
-        // Check if GOOGLE_DRIVE_KEY_FILE environment variable is set
-        if (process.env.GOOGLE_DRIVE_KEY_FILE) {
-          const serviceAccountPath = process.env.GOOGLE_DRIVE_KEY_FILE;
-          console.log('🔧 Using Google Drive key file from environment variable:', serviceAccountPath);
+        if (fs.existsSync(process.env.GOOGLE_DRIVE_KEY_FILE)) {
+          console.log('✅ Service account file exists at environment path');
+          const credentials = JSON.parse(fs.readFileSync(process.env.GOOGLE_DRIVE_KEY_FILE, 'utf8'));
           
-          if (fs.existsSync(serviceAccountPath)) {
-            console.log('✅ Service account file exists at environment path');
-            credentials = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
-          } else {
-            console.warn('❌ Google Drive key file not found at environment path:', serviceAccountPath);
-          }
-        }
-        
-        // If no credentials from environment, try default path
-        if (!credentials) {
-          const defaultPath = path.join(__dirname, '..', '..', 'google-sheets-key.json');
-          console.log('🔧 Using default Google Drive key file path:', defaultPath);
-          
-          if (fs.existsSync(defaultPath)) {
-            console.log('✅ Service account file exists at default path');
-            credentials = JSON.parse(fs.readFileSync(defaultPath, 'utf8'));
-          } else {
-            console.warn('❌ Google Sheets service account file not found:', defaultPath);
-          }
-        }
-        
-        // Check if GOOGLE_SERVICE_ACCOUNT_CREDENTIALS environment variable is set (JSON string)
-        if (!credentials && process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS) {
-          try {
-            console.log('🔧 Using Google service account credentials from environment variable');
-            credentials = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_CREDENTIALS);
-          } catch (error) {
-            console.error('❌ Failed to parse GOOGLE_SERVICE_ACCOUNT_CREDENTIALS:', error.message);
-          }
-        }
-        
-        if (credentials) {
-          console.log('🔧 Creating Google Auth with service account credentials...');
           this.auth = new google.auth.GoogleAuth({
             credentials: credentials,
             scopes: [
@@ -133,15 +120,38 @@ class GoogleSheetsService {
               'https://www.googleapis.com/auth/drive'
             ]
           });
+        } else {
+          console.warn('❌ Google Drive key file not found at environment path:', process.env.GOOGLE_DRIVE_KEY_FILE);
+        }
+      }
+      // Method 6: Try default service account file (fallback)
+      else {
+        const defaultPath = path.join(__dirname, '..', '..', 'google-sheets-key.json');
+        console.log('🔧 Using default Google Drive key file path:', defaultPath);
+        
+        if (fs.existsSync(defaultPath)) {
+          console.log('✅ Service account file exists at default path');
+          const credentials = JSON.parse(fs.readFileSync(defaultPath, 'utf8'));
+          
+          this.auth = new google.auth.GoogleAuth({
+            credentials: credentials,
+            scopes: [
+              'https://www.googleapis.com/auth/spreadsheets',
+              'https://www.googleapis.com/auth/drive'
+            ]
+          });
+        } else {
+          console.warn('❌ Google Sheets service account file not found:', defaultPath);
         }
       }
       
       if (!this.auth) {
         console.warn('❌ No authentication method configured. Google Sheets functionality will be disabled.');
         console.warn('🔧 Configure one of the following:');
+        console.warn('   - GOOGLE_APPLICATION_CREDENTIALS_JSON (for Service Account - recommended)');
         console.warn('   - GOOGLE_USE_ADC=true (for Application Default Credentials)');
         console.warn('   - GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET (for OAuth2)');
-        console.warn('   - GOOGLE_DRIVE_KEY_FILE (for service account)');
+        console.warn('   - GOOGLE_DRIVE_KEY_FILE (for service account file)');
         return;
       }
 
