@@ -4,4 +4,4 @@ EMAIL_USER=melmoussallem@gmail.com
 EMAIL_PASS=wmyj okmb jeon vvbw
 ADMIN_EMAIL=melmoussallem@gmail.com
 NODE_ENV=production
-FRONTEND_URL=https://offaccess.com
+FRONTEND_URL=https://portal.offaccess.com
