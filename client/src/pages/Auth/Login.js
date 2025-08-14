@@ -24,7 +24,7 @@ import {
 } from '@mui/icons-material';
 import { useForm } from 'react-hook-form';
 import { useAuth } from '../../contexts/AuthContext';
-import Logo from '../../components/Logo';
+import LoginLogo from '../../components/LoginLogo';
 
 // Animation keyframes
 const fadeInUp = keyframes`
@@ -371,7 +371,7 @@ const Login = () => {
           >
             {/* Header */}
             <Box textAlign="center" mb={4}>
-              <Logo size="xlarge" sx={{ mb: 2 }} variant="black" />
+              <LoginLogo />
               <Typography
                 variant="h4"
                 component="h1"
