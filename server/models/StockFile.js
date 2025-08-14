@@ -22,10 +22,7 @@ const StockFileSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  googleSheetUrl: {
-    type: String,
-    default: null
-  }
+
 });
 
 module.exports = mongoose.models.StockFile || mongoose.model('StockFile', StockFileSchema); 

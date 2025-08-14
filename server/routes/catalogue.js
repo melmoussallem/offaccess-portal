@@ -623,27 +623,7 @@ router.put('/:brandId/stock-file/:fileId', authenticateToken, requireAdmin, asyn
   }
 });
 
-// Update Google Sheet URL for stock file (admin only)
-router.put('/:brandId/stock-file/:fileId/google-sheet', authenticateToken, requireAdmin, async (req, res) => {
-  try {
-    const { fileId } = req.params;
-    const { googleSheetUrl } = req.body;
-    
-    const stockFile = await StockFile.findById(fileId);
-    if (!stockFile) {
-      return res.status(404).json({ message: 'Stock file not found' });
-    }
-    
-    stockFile.googleSheetUrl = googleSheetUrl || null;
-    await stockFile.save();
-    
-    res.json({ message: 'Google Sheet URL updated successfully', stockFile });
-    
-  } catch (error) {
-    console.error('Update Google Sheet URL error:', error);
-    res.status(500).json({ message: 'Failed to update Google Sheet URL' });
-  }
-});
+
 
 // Replace stock file (admin only)
 router.put('/:brandId/stock-file/:fileId/replace', authenticateToken, requireAdmin, upload.array('files', 1), async (req, res) => {
@@ -781,35 +761,7 @@ router.get('/brands/accessible', authenticateToken, async (req, res) => {
   }
 });
 
-// Update Google Sheet URL for a stock file (admin only)
-router.put('/:brandId/stock-file/:fileId/google-sheet', authenticateToken, requireAdmin, async (req, res) => {
-  try {
-    const { brandId, fileId } = req.params;
-    const { googleSheetUrl } = req.body;
-    
-    // Validate Google Sheet URL format
-    if (googleSheetUrl && !/^https:\/\/docs\.google\.com\/spreadsheets\/d\//.test(googleSheetUrl)) {
-      return res.status(400).json({ message: 'Invalid Google Sheet URL format' });
-    }
-    
-    const stockFile = await StockFile.findOne({ _id: fileId, brandId });
-    if (!stockFile) {
-      return res.status(404).json({ message: 'File not found' });
-    }
-    
-    // Update the Google Sheet URL
-    stockFile.googleSheetUrl = googleSheetUrl || null;
-    await stockFile.save();
-    
-    res.json({ 
-      message: 'Google Sheet URL updated successfully', 
-      stockFile 
-    });
-  } catch (error) {
-    console.error('Error updating Google Sheet URL:', error);
-    res.status(500).json({ message: 'Failed to update Google Sheet URL' });
-  }
-});
+
 
 // Replace file (admin only) - matches frontend call
 router.put('/replace-file/:fileId', authenticateToken, requireAdmin, upload.array('files', 1), async (req, res) => {
