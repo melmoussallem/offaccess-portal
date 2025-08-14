@@ -370,8 +370,8 @@ const Login = () => {
             }}
           >
             {/* Header */}
-            <Box textAlign="center" mb={4}>
-              <Logo size="xlarge" sx={{ mb: 2 }} type="logo" variant="black" stacked={true} />
+            <Box textAlign="center" mb={3}>
+              <Logo size="xlarge" sx={{ mb: 1 }} type="logo" variant="black" stacked={true} />
               <Typography
                 variant="h4"
                 component="h1"
