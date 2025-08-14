@@ -359,8 +359,8 @@ const Login = () => {
               boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
               animation: `${fadeInUp} 0.8s ease-out`,
               margin: 0,
-              maxHeight: '85vh',
-              overflow: 'auto',
+              maxHeight: '95vh',
+              overflow: 'visible',
               '&:focus': {
                 outline: 'none'
               },
@@ -371,7 +371,7 @@ const Login = () => {
           >
             {/* Header */}
             <Box textAlign="center" mb={1.5}>
-              <Logo size="xlarge" sx={{ mb: 0.5 }} type="logo" variant="black" stacked={true} />
+              <Logo size="xlarge" sx={{ mb: 0 }} type="logo" variant="black" stacked={true} />
               <Typography
                 variant="h4"
                 component="h1"
