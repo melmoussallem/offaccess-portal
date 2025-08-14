@@ -136,7 +136,7 @@ const Layout = () => {
           textAlign: 'center'
         }}
       >
-        <Logo size="large" sx={{ mb: 2 }} />
+        <Logo size="large" sx={{ mb: 2 }} variant="black" />
         <Typography variant="h6" component="h1" fontWeight="bold" color="primary" sx={{ mb: 1 }}>
           Digital Wholesale Catalogue
         </Typography>
@@ -214,7 +214,7 @@ const Layout = () => {
           
           {/* Logo */}
           <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-            <Logo size="small" showText={false} />
+            <Logo size="small" showText={false} variant="black" />
           </Box>
           
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>

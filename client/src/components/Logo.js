@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, useTheme } from '@mui/material';
 
 const Logo = ({ 
   variant = 'default', 
@@ -7,6 +7,8 @@ const Logo = ({
   showText = true,
   sx = {} 
 }) => {
+  const theme = useTheme();
+  
   const getSize = () => {
     switch (size) {
       case 'small':
@@ -37,6 +39,18 @@ const Logo = ({
     }
   };
 
+  // Determine which logo to use based on variant and background
+  const getLogoSrc = () => {
+    if (variant === 'white') {
+      return '/Off Access White.svg';
+    } else if (variant === 'black') {
+      return '/Off Access Black.svg';
+    } else {
+      // Auto-detect based on theme or use black as default
+      return '/Off Access Black.svg';
+    }
+  };
+
   const logoStyles = {
     display: 'flex',
     alignItems: 'center',
@@ -52,13 +66,19 @@ const Logo = ({
   return (
     <Box sx={logoStyles}>
       <img 
-        src="/logo.svg" 
-        alt="OffAccess Logo" 
+        src={getLogoSrc()} 
+        alt="Off Access Logo" 
         style={imageStyles}
         onError={(e) => {
-          // Fallback to text if image fails to load
-          e.target.style.display = 'none';
-          e.target.nextSibling.style.display = 'block';
+          // Fallback to icon if logo fails to load
+          e.target.src = '/Off Access Icon.png';
+          e.target.onerror = () => {
+            // Final fallback to text
+            e.target.style.display = 'none';
+            if (e.target.nextSibling) {
+              e.target.nextSibling.style.display = 'block';
+            }
+          };
         }}
       />
       {showText && (
@@ -75,7 +95,7 @@ const Logo = ({
           }}
           className="fallback"
         >
-          OffAccess
+          Off Access
         </Typography>
       )}
     </Box>
