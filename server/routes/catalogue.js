@@ -197,19 +197,26 @@ router.post('/:brandId/upload', authenticateToken, requireAdmin, upload.array('f
       
       // Generate unique filename
       const fileName = fileStorageService.generateUniqueFileName(file.originalname, 'catalogue-');
+      console.log('📝 Generated filename:', fileName);
       
       // Upload to Google Cloud Storage
+      console.log('☁️ Uploading file to Google Cloud Storage...');
       const uploadResult = await fileStorageService.uploadFile(
         file.buffer,
         fileName,
         file.mimetype,
         'catalogue'
       );
-      
+
+      console.log('☁️ Upload result:', uploadResult);
+
       if (!uploadResult.success) {
-        console.error('Failed to upload file to GCS:', uploadResult.error);
-        return res.status(500).json({ message: 'Failed to upload file to cloud storage' });
+        console.error('❌ Failed to upload file to cloud storage:', uploadResult.error);
+        return res.status(500).json({ message: 'Failed to upload file to cloud storage: ' + uploadResult.error });
       }
+
+      // Convert file to base64 for backup (same as orders)
+      const base64File = file.buffer.toString('base64');
       
       console.log('File uploaded to GCS successfully:', uploadResult.filePath);
       
@@ -219,7 +226,8 @@ router.post('/:brandId/upload', authenticateToken, requireAdmin, upload.array('f
         originalName: file.originalname,
         filePath: uploadResult.filePath,
         fileSize: file.size,
-        mimeType: file.mimetype
+        mimeType: file.mimetype,
+        base64Data: base64File // Add base64 backup like orders
       });
       await stockFile.save();
       console.log('Saved stockFile with originalName:', stockFile.originalName);
@@ -278,9 +286,18 @@ router.delete('/:brandId/stock-file/:fileId', authenticateToken, requireAdmin, a
       return res.status(404).json({ message: 'Stock file not found' });
     }
     
-    // Delete the physical file
-    if (fs.existsSync(stockFile.filePath)) {
-      fs.unlinkSync(stockFile.filePath);
+    // Delete the physical file from Google Cloud Storage
+    if (stockFile.filePath) {
+      try {
+        const deleteResult = await fileStorageService.deleteFile(stockFile.filePath);
+        if (deleteResult.success) {
+          console.log('✅ File deleted from GCS:', stockFile.filePath);
+        } else {
+          console.log('⚠️ Could not delete file from GCS:', deleteResult.error);
+        }
+      } catch (deleteError) {
+        console.log('⚠️ Error deleting file from GCS:', deleteError.message);
+      }
     }
     
     // Delete from database
@@ -384,22 +401,44 @@ router.get('/:brandId/stock-file/:fileId/download', authenticateToken, async (re
     
     console.log('File extension:', fileExtension, 'Content-Type:', contentType);
     
-    // Download from Google Cloud Storage
-    console.log('Downloading file from GCS:', stockFile.filePath);
-    const downloadResult = await fileStorageService.downloadFile(stockFile.filePath);
-    
-    if (!downloadResult.success) {
-      console.error('Failed to download file from GCS:', downloadResult.error);
-      return res.status(404).json({ message: 'File not found in cloud storage' });
+    // Try Google Cloud Storage first (same as orders)
+    if (stockFile.filePath) {
+      console.log(`[DOWNLOAD] Attempting to download from Google Cloud Storage: ${stockFile.filePath}`);
+      const downloadResult = await fileStorageService.downloadFile(stockFile.filePath);
+      
+      if (downloadResult.success) {
+        console.log(`[DOWNLOAD] Serving from Google Cloud Storage for catalogue file ${stockFile._id}`);
+        const contentDisposition = `attachment; filename="${downloadFilename}"; filename*=UTF-8''${encodeURIComponent(downloadFilename)}`;
+        console.log(`[DOWNLOAD] Setting Content-Disposition: ${contentDisposition}`);
+        res.setHeader('Content-Type', downloadResult.contentType || contentType);
+        res.setHeader('Content-Disposition', contentDisposition);
+        res.setHeader('Content-Length', downloadResult.buffer.length);
+        res.setHeader('X-Original-Filename', downloadFilename);
+        res.setHeader('X-File-Metadata', JSON.stringify({ originalName: stockFile.originalName, fileType: 'catalogue' }));
+        console.log(`[DOWNLOAD] Headers set, sending buffer of size: ${downloadResult.buffer.length}`);
+        return res.end(downloadResult.buffer);
+      } else {
+        console.log(`[DOWNLOAD] GCS download failed: ${downloadResult.error}`);
+      }
     }
     
-    // Set headers for file download with proper encoding and original filename
-    res.setHeader('Content-Type', contentType);
-    res.setHeader('Content-Disposition', `attachment; filename="${downloadFilename}"; filename*=UTF-8''${encodeURIComponent(downloadFilename)}`);
-    res.setHeader('Content-Length', downloadResult.size);
+    // Fallback to base64 data (same as orders)
+    if (stockFile.base64Data) {
+      console.log(`[DOWNLOAD] Serving from base64 for catalogue file ${stockFile._id}`);
+      const buffer = Buffer.from(stockFile.base64Data, 'base64');
+      const contentDisposition = `attachment; filename="${downloadFilename}"; filename*=UTF-8''${encodeURIComponent(downloadFilename)}`;
+      console.log(`[DOWNLOAD] Setting Content-Disposition: ${contentDisposition}`);
+      res.setHeader('Content-Type', contentType);
+      res.setHeader('Content-Disposition', contentDisposition);
+      res.setHeader('Content-Length', buffer.length);
+      res.setHeader('X-Original-Filename', downloadFilename);
+      res.setHeader('X-File-Metadata', JSON.stringify({ originalName: stockFile.originalName, fileType: 'catalogue' }));
+      console.log(`[DOWNLOAD] Headers set, sending buffer of size: ${buffer.length}`);
+      return res.end(buffer);
+    }
     
-    // Send the file buffer
-    res.send(downloadResult.buffer);
+    console.log(`[DOWNLOAD] File not found for catalogue file ${stockFile._id}`);
+    return res.status(404).json({ message: 'File not found in cloud storage or database. Please contact support.' });
     
   } catch (error) {
     console.error('Download error:', error);
@@ -802,19 +841,26 @@ router.put('/replace-file/:fileId', authenticateToken, requireAdmin, upload.arra
     
     // Generate unique filename for new file
     const fileName = fileStorageService.generateUniqueFileName(newFile.originalname, 'catalogue-');
+    console.log('📝 Generated replacement filename:', fileName);
     
     // Upload new file to Google Cloud Storage
+    console.log('☁️ Uploading replacement file to Google Cloud Storage...');
     const uploadResult = await fileStorageService.uploadFile(
       newFile.buffer,
       fileName,
       newFile.mimetype,
       'catalogue'
     );
+
+    console.log('☁️ Replacement upload result:', uploadResult);
     
     if (!uploadResult.success) {
-      console.error('Failed to upload replacement file to GCS:', uploadResult.error);
-      return res.status(500).json({ message: 'Failed to upload replacement file to cloud storage' });
+      console.error('❌ Failed to upload replacement file to cloud storage:', uploadResult.error);
+      return res.status(500).json({ message: 'Failed to upload replacement file to cloud storage: ' + uploadResult.error });
     }
+
+    // Convert file to base64 for backup (same as orders)
+    const base64File = newFile.buffer.toString('base64');
     
     console.log('✅ Replacement file uploaded to GCS:', uploadResult.filePath);
     
@@ -824,6 +870,7 @@ router.put('/replace-file/:fileId', authenticateToken, requireAdmin, upload.arra
     stockFile.filePath = uploadResult.filePath;
     stockFile.fileSize = newFile.size;
     stockFile.mimeType = newFile.mimetype;
+    stockFile.base64Data = base64File; // Add base64 backup like orders
     stockFile.uploadedAt = new Date();
     
     await stockFile.save();

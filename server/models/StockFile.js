@@ -22,7 +22,10 @@ const StockFileSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-
+  base64Data: {
+    type: String,
+    required: false
+  }
 });
 
 module.exports = mongoose.models.StockFile || mongoose.model('StockFile', StockFileSchema); 
