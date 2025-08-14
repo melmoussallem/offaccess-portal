@@ -23,23 +23,9 @@ DownloadTracking = mongoose.models.DownloadTracking || require('../models/Downlo
 // Safe model import for StockFile
 StockFile = mongoose.models.StockFile || require('../models/StockFile');
 
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    const dir = path.join(__dirname, '../../uploads/catalogue');
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename: function (req, file, cb) {
-    // Use timestamp + original name for uniqueness, but keep original name readable
-    const timestamp = Date.now();
-    const originalName = file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, '_'); // sanitize
-    cb(null, `${timestamp}-${originalName}`);
-  }
-});
-
+// Configure multer for file uploads (using memory storage for GCS)
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   fileFilter: (req, file, cb) => {
     const allowed = ['.xlsx', '.xlsm'];
     if (allowed.includes(path.extname(file.originalname).toLowerCase())) {
@@ -49,6 +35,9 @@ const upload = multer({
     }
   }
 });
+
+// Import file storage service
+const fileStorageService = require('../utils/fileStorageService');
 
 // Get all brands (admin only)
 router.get('/brands', authenticateToken, requireAdmin, async (req, res) => {
@@ -200,18 +189,37 @@ router.post('/:brandId/upload', authenticateToken, requireAdmin, upload.array('f
     }
     const savedStockFiles = [];
     for (const file of req.files) {
-      const relativePath = path.relative(path.join(__dirname, '../../'), file.path);
-      console.log('Uploading file:', {
+      console.log('Uploading file to Google Cloud Storage:', {
         originalname: file.originalname,
-        filename: file.filename,
-        path: file.path,
-        relativePath: relativePath
+        size: file.size,
+        mimetype: file.mimetype
       });
+      
+      // Generate unique filename
+      const fileName = fileStorageService.generateUniqueFileName(file.originalname, 'catalogue-');
+      
+      // Upload to Google Cloud Storage
+      const uploadResult = await fileStorageService.uploadFile(
+        file.buffer,
+        fileName,
+        file.mimetype,
+        'catalogue'
+      );
+      
+      if (!uploadResult.success) {
+        console.error('Failed to upload file to GCS:', uploadResult.error);
+        return res.status(500).json({ message: 'Failed to upload file to cloud storage' });
+      }
+      
+      console.log('File uploaded to GCS successfully:', uploadResult.filePath);
+      
       const stockFile = new StockFile({
         brandId: brand._id,
-        fileName: file.filename,
+        fileName: fileName,
         originalName: file.originalname,
-        filePath: relativePath
+        filePath: uploadResult.filePath,
+        fileSize: file.size,
+        mimeType: file.mimetype
       });
       await stockFile.save();
       console.log('Saved stockFile with originalName:', stockFile.originalName);
@@ -330,17 +338,6 @@ router.get('/:brandId/stock-file/:fileId/download', authenticateToken, async (re
       return res.status(404).json({ message: 'File not found in database' });
     }
     
-    // Check if file exists on disk - use the filePath directly from the stockFile
-    const filePath = path.join(__dirname, '../../', stockFile.filePath);
-    console.log('Looking for file at path:', filePath);
-    
-    if (!fs.existsSync(filePath)) {
-      console.error('Download error: File not found on disk at path:', filePath);
-      return res.status(404).json({ message: 'File not found on disk' });
-    }
-    
-    console.log('File found, starting download...');
-    
     // Track download for buyers only
     if (user.role === 'buyer') {
       try {
@@ -387,21 +384,22 @@ router.get('/:brandId/stock-file/:fileId/download', authenticateToken, async (re
     
     console.log('File extension:', fileExtension, 'Content-Type:', contentType);
     
+    // Download from Google Cloud Storage
+    console.log('Downloading file from GCS:', stockFile.filePath);
+    const downloadResult = await fileStorageService.downloadFile(stockFile.filePath);
+    
+    if (!downloadResult.success) {
+      console.error('Failed to download file from GCS:', downloadResult.error);
+      return res.status(404).json({ message: 'File not found in cloud storage' });
+    }
+    
     // Set headers for file download with proper encoding and original filename
     res.setHeader('Content-Type', contentType);
     res.setHeader('Content-Disposition', `attachment; filename="${downloadFilename}"; filename*=UTF-8''${encodeURIComponent(downloadFilename)}`);
-    res.setHeader('Content-Length', fs.statSync(filePath).size);
+    res.setHeader('Content-Length', downloadResult.size);
     
-    // Stream the file to response
-    const fileStream = fs.createReadStream(filePath);
-    fileStream.on('error', (error) => {
-      console.error('File stream error:', error);
-      if (!res.headersSent) {
-        res.status(500).json({ message: 'Error reading file' });
-      }
-    });
-    
-    fileStream.pipe(res);
+    // Send the file buffer
+    res.send(downloadResult.buffer);
     
   } catch (error) {
     console.error('Download error:', error);
@@ -448,14 +446,37 @@ router.post('/:brandId/catalogue-upload', authenticateToken, requireAdmin, uploa
     const savedFiles = [];
     
     for (const file of req.files) {
-      const relativePath = path.relative(path.join(__dirname, '../../'), file.path);
+      console.log('Uploading catalogue file to Google Cloud Storage:', {
+        originalname: file.originalname,
+        size: file.size,
+        mimetype: file.mimetype
+      });
+      
+      // Generate unique filename
+      const fileName = fileStorageService.generateUniqueFileName(file.originalname, 'catalogue-');
+      
+      // Upload to Google Cloud Storage
+      const uploadResult = await fileStorageService.uploadFile(
+        file.buffer,
+        fileName,
+        file.mimetype,
+        'catalogue'
+      );
+      
+      if (!uploadResult.success) {
+        console.error('Failed to upload catalogue file to GCS:', uploadResult.error);
+        return res.status(500).json({ message: 'Failed to upload file to cloud storage' });
+      }
+      
+      console.log('Catalogue file uploaded to GCS successfully:', uploadResult.filePath);
+      
       const catalogueEntry = new Catalogue({
         brandId: brandId,
         brandName: brandName,
         description: description || '',
-        fileName: file.filename,
+        fileName: fileName,
         originalName: file.originalname,
-        filePath: relativePath,
+        filePath: uploadResult.filePath,
         fileSize: file.size,
         mimeType: file.mimetype,
         columns: parsedColumns,
