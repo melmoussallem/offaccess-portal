@@ -379,7 +379,7 @@ const Login = () => {
                   color: '#1976d2',
                   fontWeight: 700,
                   mb: 25,
-                  fontSize: { xs: '1.75rem', sm: '2rem' }
+                  fontSize: { xs: '1.31rem', sm: '1.5rem' }
                 }}
               >
                 Welcome Back
@@ -397,7 +397,7 @@ const Login = () => {
               sx={{ 
                 display: 'flex', 
                 flexDirection: 'column', 
-                gap: 0.5
+                gap: 3
               }}
             >
               {/* Email Field */}
