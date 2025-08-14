@@ -23,7 +23,6 @@ import {
   CheckCircleOutline as CheckCircleOutlineIcon,
   Error as ErrorIcon,
   Euro as EuroIcon,
-  AttachMoney as AttachMoneyIcon,
   Warning as WarningIcon,
   Schedule as ScheduleIcon,
   Cancel as CancelIcon
@@ -193,20 +192,11 @@ const Help = () => {
       swiftCode: 'EBILAEAD'
     };
 
-    const usdBankDetails = {
-      accountNumber: 'USD 1014295349401',
-      accountName: 'CODE DESIGN APPAREL LLC',
-      iban: 'AE 510260001014295349401',
-      registeredAddress: 'WAREHOUS1, JAFZA, AL KHABAISI DEIRA, DUBAI, SATARI OUTLET, DUBAI, DUBAI, 88109, UNITED ARAB EMIRATES',
-      bankName: 'Emirates NBD',
-      branchName: 'DEIRA CITY CENTRE',
-      swiftCode: 'EBILAEAD'
-    };
+
 
     const currencies = [
       { label: 'AED Bank Account', value: 'AED', icon: <img src={aedIconUrl} alt="AED" style={{ width: 20, height: 20, filter: 'invert(32%) sepia(92%) saturate(2097%) hue-rotate(186deg) brightness(92%) contrast(92%)', verticalAlign: 'middle' }} /> },
-      { label: 'EUR Bank Account', value: 'EUR', icon: <EuroIcon sx={{ color: '#1976d2', fontSize: 24 }} /> },
-      { label: 'USD Bank Account', value: 'USD', icon: <AttachMoneyIcon sx={{ color: '#1976d2', fontSize: 24 }} /> }
+      { label: 'EUR Bank Account', value: 'EUR', icon: <EuroIcon sx={{ color: '#1976d2', fontSize: 24 }} /> }
     ];
 
     const renderCurrencyTab = (currency) => {
@@ -218,9 +208,6 @@ const Help = () => {
           break;
         case 'EUR':
           selectedBankDetails = eurBankDetails;
-          break;
-        case 'USD':
-          selectedBankDetails = usdBankDetails;
           break;
         default:
           selectedBankDetails = bankDetails;
@@ -362,7 +349,6 @@ const Help = () => {
           <Box sx={{ mt: 3 }}>
             {activeCurrencyTab === 0 && renderCurrencyTab('AED')}
             {activeCurrencyTab === 1 && renderCurrencyTab('EUR')}
-            {activeCurrencyTab === 2 && renderCurrencyTab('USD')}
           </Box>
         </Fade>
       </Box>
