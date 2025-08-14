@@ -5,7 +5,6 @@ const logoHtml = `
   <div style="text-align: center; margin-bottom: 30px; padding: 20px 0;">
     <img src="https://portal.offaccess.com/Off Access Black.png" alt="Off Access Logo" style="height: 60px; width: auto; margin-bottom: 10px;">
     <h1 style="color: #1976d2; margin: 0; font-size: 24px; font-weight: 600;">Off Access</h1>
-    <p style="color: #666; margin: 5px 0 0 0; font-size: 14px;">Digital Wholesale Catalogue</p>
   </div>
 `;
 
@@ -32,13 +31,13 @@ const transporter = nodemailer.createTransport(
 const emailTemplates = {
   // 1. Registration Completion
   registrationConfirmation: (user) => ({
-    subject: 'Registration Confirmation - Digital Wholesale Catalogue',
+    subject: 'Registration Confirmation - Off Access',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
         ${logoHtml}
-        <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">Welcome to Digital Wholesale Catalogue</h2>
+        <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">Welcome to Off Access</h2>
         <p>Dear ${user.name},</p>
-        <p>Thank you for registering with our Digital Wholesale Catalogue. Your application has been received and is currently under review by our team.</p>
+        <p>Thank you for registering with Off Access. Your application has been received and is currently under review by our team.</p>
         <div style="background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin: 20px 0;">
           <h3 style="color: #333; margin-top: 0;">Registration Details:</h3>
           <ul style="margin: 0; padding-left: 20px;">
@@ -52,9 +51,9 @@ const emailTemplates = {
         <p>We will review your application and notify you via email once a decision has been made. This process typically takes 1-2 business days.</p>
         <p>If you have any questions, please don't hesitate to contact our support team.</p>
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
-          <p style="margin: 0; color: #666;">Best regards,<br><strong>Digital Wholesale Catalogue Team</strong></p>
+          <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
           <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-            ${process.env.ADMIN_EMAIL || 'support@digitalwholesale.com'}
+            ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
           </p>
         </div>
       </div>
@@ -66,7 +65,7 @@ const emailTemplates = {
     const { name, status, reason } = data;
     const statusMessages = {
       approved: {
-        subject: 'Application Approved - Digital Wholesale Catalogue',
+        subject: 'Application Approved - Off Access',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
             ${logoHtml}
@@ -87,16 +86,16 @@ const emailTemplates = {
             </div>
             <p>If you have any questions or need assistance, please don't hesitate to contact our support team.</p>
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
-              <p style="margin: 0; color: #666;">Best regards,<br><strong>Digital Wholesale Catalogue Team</strong></p>
+              <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
               <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-                ${process.env.ADMIN_EMAIL || 'support@digitalwholesale.com'}
+                ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
               </p>
             </div>
           </div>
         `
       },
       rejected: {
-        subject: 'Application Status - Digital Wholesale Catalogue',
+        subject: 'Application Status - Off Access',
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
             ${logoHtml}
@@ -110,9 +109,9 @@ const emailTemplates = {
             <p>If you believe this decision was made in error or if you have additional information to provide, please contact our support team for further assistance.</p>
             <p>You may also reapply in the future if your circumstances change.</p>
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
-              <p style="margin: 0; color: #666;">Best regards,<br><strong>Digital Wholesale Catalogue Team</strong></p>
+              <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
               <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-                ${process.env.ADMIN_EMAIL || 'support@digitalwholesale.com'}
+                ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
               </p>
             </div>
           </div>
@@ -129,9 +128,7 @@ const emailTemplates = {
       subject: `New Stock File Available - ${stockFile.name}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-          <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #333; margin: 0;">Digital Wholesale Catalogue</h1>
-          </div>
+          ${logoHtml}
           <h2 style="color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 10px;">🆕 New Stock File Available!</h2>
           <p>Dear ${user.name},</p>
           <p>We're excited to announce that a new Stock File has been added to our catalogue and is now available for your review.</p>
@@ -148,9 +145,9 @@ const emailTemplates = {
           </div>
           <p>If you have any questions about this Stock File or need assistance with your order, please contact our support team.</p>
           <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
-            <p style="margin: 0; color: #666;">Best regards,<br><strong>Digital Wholesale Catalogue Team</strong></p>
+            <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
             <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-              ${process.env.ADMIN_EMAIL || 'support@digitalwholesale.com'}
+              ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
             </p>
           </div>
         </div>
@@ -165,9 +162,7 @@ const emailTemplates = {
       subject: `Order Status Update - ${order.orderNumber || 'Order'}`,
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-          <div style="text-align: center; margin-bottom: 30px;">
-            <h1 style="color: #333; margin: 0;">Digital Wholesale Catalogue</h1>
-          </div>
+          ${logoHtml}
           <h2 style="color: #333; border-bottom: 2px solid #007bff; padding-bottom: 10px;">📦 Order Status Update</h2>
           <p>Dear ${user.name},</p>
           <p>Your order status has been updated. Here are the latest details:</p>
@@ -193,9 +188,9 @@ const emailTemplates = {
           </div>
           <p>If you have any questions about this status update, please contact our support team.</p>
           <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
-            <p style="margin: 0; color: #666;">Best regards,<br><strong>Digital Wholesale Catalogue Team</strong></p>
+            <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
             <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-              ${process.env.ADMIN_EMAIL || 'support@digitalwholesale.com'}
+              ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
             </p>
           </div>
         </div>
@@ -208,9 +203,7 @@ const emailTemplates = {
     subject: `Order Received - ${order.orderNumber}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #333; margin: 0;">Digital Wholesale Catalogue</h1>
-        </div>
+        ${logoHtml}
         <h2 style="color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 10px;">📦 Order Received</h2>
         <p>Dear ${order.buyer.name},</p>
         <p>Thank you for your order! We have received your order and it is now being processed.</p>
@@ -231,9 +224,9 @@ const emailTemplates = {
         </div>
         <p>If you have any questions about your order, please contact our support team.</p>
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
-          <p style="margin: 0; color: #666;">Best regards,<br><strong>Digital Wholesale Catalogue Team</strong></p>
+          <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
           <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-            ${process.env.ADMIN_EMAIL || 'support@digitalwholesale.com'}
+            ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
           </p>
         </div>
       </div>
@@ -242,15 +235,13 @@ const emailTemplates = {
 
   // Password Reset Email
   passwordReset: (userName, resetUrl) => ({
-    subject: 'Password Reset Request - Digital Wholesale Catalogue',
+    subject: 'Password Reset Request - Off Access',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #333; margin: 0;">Digital Wholesale Catalogue</h1>
-        </div>
+        ${logoHtml}
         <h2 style="color: #dc3545; border-bottom: 2px solid #dc3545; padding-bottom: 10px;">🔐 Password Reset Request</h2>
         <p>Dear ${userName},</p>
-        <p>We received a request to reset your password for your Digital Wholesale Catalogue account.</p>
+        <p>We received a request to reset your password for your Off Access account.</p>
         <div style="background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 5px; padding: 15px; margin: 20px 0;">
           <h3 style="color: #333; margin-top: 0;">Important Information:</h3>
           <ul style="margin: 0; padding-left: 20px;">
@@ -266,9 +257,9 @@ const emailTemplates = {
         <p style="word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 12px;">${resetUrl}</p>
         <p>If you have any questions or need assistance, please contact our support team.</p>
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
-          <p style="margin: 0; color: #666;">Best regards,<br><strong>Digital Wholesale Catalogue Team</strong></p>
+          <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
           <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-            ${process.env.ADMIN_EMAIL || 'support@digitalwholesale.com'}
+            ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
           </p>
         </div>
       </div>
@@ -279,9 +270,7 @@ const emailTemplates = {
     subject: `Order Received - ${order.orderNumber}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #333; margin: 0;">Digital Wholesale Catalogue</h1>
-        </div>
+        ${logoHtml}
         <h2 style="color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 10px;">📦 Order Received</h2>
         <p>Dear ${order.buyer.name},</p>
         <p>We have received your order and it is currently under review.</p>
@@ -300,9 +289,9 @@ const emailTemplates = {
         </div>
         <p>If you have any questions, please contact our support team.</p>
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
-          <p style="margin: 0; color: #666;">Best regards,<br><strong>Digital Wholesale Catalogue Team</strong></p>
+          <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
           <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-            ${process.env.ADMIN_EMAIL || 'support@digitalwholesale.com'}
+            ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
           </p>
         </div>
       </div>
@@ -313,9 +302,7 @@ const emailTemplates = {
     subject: `${invoiceType === 'proforma' ? 'Pro Forma' : 'Final'} Invoice Generated - ${order.orderNumber}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #333; margin: 0;">Digital Wholesale Catalogue</h1>
-        </div>
+        ${logoHtml}
         <h2 style="color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 10px;">📄 ${invoiceType === 'proforma' ? 'Pro Forma' : 'Final'} Invoice</h2>
         <p>Dear ${order.buyer.name},</p>
         <p>A ${invoiceType === 'proforma' ? 'pro forma' : 'final'} invoice has been generated for your order.</p>
@@ -333,9 +320,9 @@ const emailTemplates = {
         </div>
         <p>If you have any questions, please contact our support team.</p>
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
-          <p style="margin: 0; color: #666;">Best regards,<br><strong>Digital Wholesale Catalogue Team</strong></p>
+          <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
           <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-            ${process.env.ADMIN_EMAIL || 'support@digitalwholesale.com'}
+            ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
           </p>
         </div>
       </div>
@@ -346,9 +333,7 @@ const emailTemplates = {
     subject: `Payment Overdue - ${order.orderNumber}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #333; margin: 0;">Digital Wholesale Catalogue</h1>
-        </div>
+        ${logoHtml}
         <h2 style="color: #dc3545; border-bottom: 2px solid #dc3545; padding-bottom: 10px;">⚠️ Payment Overdue</h2>
         <p>Dear ${order.buyer.name},</p>
         <p>This is a reminder that payment for your order is overdue.</p>
@@ -366,9 +351,9 @@ const emailTemplates = {
         </div>
         <p>If you have any questions, please contact our support team.</p>
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
-          <p style="margin: 0; color: #666;">Best regards,<br><strong>Digital Wholesale Catalogue Team</strong></p>
+          <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
           <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-            ${process.env.ADMIN_EMAIL || 'support@digitalwholesale.com'}
+            ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
           </p>
         </div>
       </div>
@@ -379,9 +364,7 @@ const emailTemplates = {
     subject: `Order Shipped - ${order.orderNumber}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #333; margin: 0;">Digital Wholesale Catalogue</h1>
-        </div>
+        ${logoHtml}
         <h2 style="color: #28a745; border-bottom: 2px solid #28a745; padding-bottom: 10px;">🚚 Order Shipped!</h2>
         <p>Dear ${order.buyer.name},</p>
         <p>Your order has been shipped and is on its way to you.</p>
@@ -399,9 +382,9 @@ const emailTemplates = {
         </div>
         <p>If you have any questions, please contact our support team.</p>
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
-          <p style="margin: 0; color: #666;">Best regards,<br><strong>Digital Wholesale Catalogue Team</strong></p>
+          <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
           <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-            ${process.env.ADMIN_EMAIL || 'support@digitalwholesale.com'}
+            ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
           </p>
         </div>
       </div>
@@ -412,9 +395,7 @@ const emailTemplates = {
     subject: `Final Invoice Generated - ${order.orderNumber}`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #333; margin: 0;">Digital Wholesale Catalogue</h1>
-        </div>
+        ${logoHtml}
         <h2 style="color: #007bff; border-bottom: 2px solid #007bff; padding-bottom: 10px;">📄 Final Invoice</h2>
         <p>Dear ${order.buyer.name},</p>
         <p>A final invoice has been generated for your order.</p>
@@ -432,9 +413,9 @@ const emailTemplates = {
         </div>
         <p>If you have any questions, please contact our support team.</p>
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
-          <p style="margin: 0; color: #666;">Best regards,<br><strong>Digital Wholesale Catalogue Team</strong></p>
+          <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
           <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-            ${process.env.ADMIN_EMAIL || 'support@digitalwholesale.com'}
+            ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
           </p>
         </div>
       </div>
@@ -443,15 +424,13 @@ const emailTemplates = {
 
   // Password Reset Email
   passwordReset: (userName, resetUrl) => ({
-    subject: 'Password Reset Request - Digital Wholesale Catalogue',
+    subject: 'Password Reset Request - Off Access',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #333; margin: 0;">Digital Wholesale Catalogue</h1>
-        </div>
+        ${logoHtml}
         <h2 style="color: #dc3545; border-bottom: 2px solid #dc3545; padding-bottom: 10px;">🔐 Password Reset Request</h2>
         <p>Dear ${userName},</p>
-        <p>We received a request to reset your password for your Digital Wholesale Catalogue account.</p>
+        <p>We received a request to reset your password for your Off Access account.</p>
         <div style="background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 5px; padding: 15px; margin: 20px 0;">
           <h3 style="color: #333; margin-top: 0;">Important Information:</h3>
           <ul style="margin: 0; padding-left: 20px;">
@@ -467,9 +446,9 @@ const emailTemplates = {
         <p style="word-break: break-all; background-color: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 12px;">${resetUrl}</p>
         <p>If you have any questions or need assistance, please contact our support team.</p>
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
-          <p style="margin: 0; color: #666;">Best regards,<br><strong>Digital Wholesale Catalogue Team</strong></p>
+          <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
           <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-            ${process.env.ADMIN_EMAIL || 'support@digitalwholesale.com'}
+            ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
           </p>
         </div>
       </div>
@@ -478,20 +457,18 @@ const emailTemplates = {
 
   // Password Change Confirmation Email
   passwordChangeConfirmation: (userName) => ({
-    subject: 'Password Change Confirmation - Digital Wholesale Catalogue',
+    subject: 'Password Change Confirmation - Off Access',
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px;">
-        <div style="text-align: center; margin-bottom: 30px;">
-          <h1 style="color: #333; margin: 0;">Digital Wholesale Catalogue</h1>
-        </div>
+        ${logoHtml}
         <h2 style="color: #28a745; border-bottom: 2px solid #28a745; padding-bottom: 10px;">✅ Password Change Confirmation</h2>
         <p>Hi ${userName},</p>
         <p>This is a confirmation that your account password has been successfully changed.</p>
         <p>If you made this change, no further action is needed. However, if you did not request this change, please contact our support team immediately.</p>
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
-          <p style="margin: 0; color: #666;">Thank you,<br><strong>Digital Wholesale Catalogue Support Team</strong></p>
+          <p style="margin: 0; color: #666;">Thank you,<br><strong>Off Access Team</strong></p>
           <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-            ${process.env.ADMIN_EMAIL || 'support@digitalwholesale.com'}
+            ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
           </p>
         </div>
       </div>
