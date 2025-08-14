@@ -20,7 +20,7 @@ const Logo = ({
       case 'large':
         return { width: 64, height: 64 };
       case 'xlarge':
-        return { width: 120, height: 120 };
+        return { width: 100, height: 80 };
       default:
         return { width: 48, height: 48 };
     }
@@ -83,7 +83,7 @@ const Logo = ({
         <img 
           src="/Off Access Icon.png" 
           alt="Off Access Icon" 
-          style={{ ...imageStyles, width: imageStyles.width * 0.4, height: imageStyles.height * 0.4, marginBottom: '-15px' }}
+          style={{ ...imageStyles, width: imageStyles.width * 0.35, height: imageStyles.height * 0.35, marginBottom: '-10px' }}
           onError={(e) => {
             e.target.style.display = 'none';
           }}
