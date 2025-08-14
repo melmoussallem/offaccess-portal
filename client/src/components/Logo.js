@@ -72,7 +72,9 @@ const Logo = ({
 
   const imageStyles = {
     ...getSize(),
-    objectFit: 'contain'
+    objectFit: 'contain',
+    ...(sx.width && { width: sx.width }),
+    ...(sx.height && { height: sx.height })
   };
 
   // For stacked layout (login page)

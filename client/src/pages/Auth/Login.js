@@ -370,7 +370,7 @@ const Login = () => {
             }}
           >
             {/* Header */}
-            <Box textAlign="center" sx={{ mb: 6 }}>
+            <Box textAlign="center" sx={{ mb: 6, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <Logo size="xlarge" sx={{ mb: 0, width: 173, height: 93 }} type="logo" variant="black" stacked={true} />
               <Typography
                 variant="h4"
