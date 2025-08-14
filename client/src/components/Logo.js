@@ -66,7 +66,7 @@ const Logo = ({
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: 0.5,
+    gap: 0,
     ...sx
   };
 
@@ -78,12 +78,12 @@ const Logo = ({
   // For stacked layout (login page)
   if (stacked) {
     return (
-      <Box sx={{ ...stackedStyles, gap: 0.5 }}>
+      <Box sx={{ ...stackedStyles, gap: 0 }}>
         {/* Icon on top - smaller size */}
         <img 
           src="/Off Access Icon.png" 
           alt="Off Access Icon" 
-          style={{ ...imageStyles, width: imageStyles.width * 0.35, height: imageStyles.height * 0.35 }}
+          style={{ ...imageStyles, width: imageStyles.width * 0.35, height: imageStyles.height * 0.35, marginBottom: '-10px' }}
           onError={(e) => {
             e.target.style.display = 'none';
           }}
