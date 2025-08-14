@@ -370,7 +370,7 @@ const Login = () => {
             }}
           >
             {/* Header */}
-            <Box textAlign="center" mb={0}>
+            <Box textAlign="center" sx={{ mb: 6 }}>
               <Logo size="xlarge" sx={{ mb: 0 }} type="logo" variant="black" stacked={true} />
               <Typography
                 variant="h4"
@@ -378,7 +378,7 @@ const Login = () => {
                 sx={{
                   color: '#1976d2',
                   fontWeight: 700,
-                  mb: 25,
+                  mb: 0,
                   fontSize: { xs: '1.31rem', sm: '1.5rem' }
                 }}
               >
@@ -397,7 +397,7 @@ const Login = () => {
               sx={{ 
                 display: 'flex', 
                 flexDirection: 'column', 
-                gap: 3
+                gap: 0.5
               }}
             >
               {/* Email Field */}

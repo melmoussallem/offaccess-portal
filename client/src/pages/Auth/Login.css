@@ -493,7 +493,6 @@
 .login-paper .MuiTypography-h4 {
   color: #1976d2 !important;
   font-weight: 700 !important;
-  margin-bottom: 25rem !important;
 }
 
 .login-paper .MuiTypography-body1 {
@@ -551,7 +550,7 @@
 
 /* Reduce margins and padding throughout */
 .login-paper .MuiBox-root {
-  gap: 3rem !important;
+  gap: 0.75rem !important;
 }
 
 .login-paper .MuiTypography-root {
