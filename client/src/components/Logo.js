@@ -48,9 +48,9 @@ const Logo = ({
     } else {
       // Logo type
       if (variant === 'white') {
-        return '/Off Access White.svg';
+        return '/Off Access White.png';
       } else {
-        return '/Off Access Black.svg';
+        return '/Off Access Black.png';
       }
     }
   };
@@ -83,7 +83,7 @@ const Logo = ({
         <img 
           src="/Off Access Icon.png" 
           alt="Off Access Icon" 
-          style={{ ...imageStyles, width: imageStyles.width * 0.4, height: imageStyles.height * 0.4, marginBottom: '-25px' }}
+          style={{ ...imageStyles, width: imageStyles.width * 0.4, height: imageStyles.height * 0.4, marginBottom: '-15px' }}
           onError={(e) => {
             e.target.style.display = 'none';
           }}

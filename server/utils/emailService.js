@@ -3,7 +3,7 @@ const nodemailer = require('nodemailer');
 // Logo HTML template
 const logoHtml = `
   <div style="text-align: center; margin-bottom: 30px; padding: 20px 0;">
-    <img src="https://portal.offaccess.com/Off Access Black.svg" alt="Off Access Logo" style="height: 60px; width: auto; margin-bottom: 10px;">
+    <img src="https://portal.offaccess.com/Off Access Black.png" alt="Off Access Logo" style="height: 60px; width: auto; margin-bottom: 10px;">
     <h1 style="color: #1976d2; margin: 0; font-size: 24px; font-weight: 600;">Off Access</h1>
     <p style="color: #666; margin: 5px 0 0 0; font-size: 14px;">Digital Wholesale Catalogue</p>
   </div>
