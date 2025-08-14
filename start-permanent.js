@@ -32,7 +32,7 @@ async function ensureDatabaseIsClean() {
       
       admin = new User({
         name: 'Admin User',
-        email: 'admin@example.com',
+        email: 'info@offaccess.com',
         password: hashedPassword,
         role: 'admin',
         status: 'approved',
@@ -41,7 +41,7 @@ async function ensureDatabaseIsClean() {
         buyerType: 'Retail'
       });
       await admin.save();
-      console.log('   ✅ Created admin user: admin@example.com / admin123');
+              console.log('   ✅ Created admin user: info@offaccess.com / admin123');
     } else {
       // Verify admin password works
       const isMatch = await admin.comparePassword('admin123');
@@ -114,7 +114,7 @@ async function startServers() {
   
   console.log('\n🎉 Both servers are starting!');
   console.log('\n📋 Login Credentials:');
-  console.log('   Admin: admin@example.com / admin123');
+          console.log('   Admin: info@offaccess.com / admin123');
   console.log('   Buyer: buyer@example.com / test123');
   console.log('\n🌐 Frontend: http://localhost:3000');
   console.log('🔧 Backend: http://localhost:5001');

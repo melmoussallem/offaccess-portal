@@ -17,12 +17,12 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/digital-w
 // Create admin user
 const createAdminUser = async () => {
   try {
-    const existingAdmin = await User.findOne({ email: 'admin@example.com' });
+    const existingAdmin = await User.findOne({ email: 'info@offaccess.com' });
     
     if (!existingAdmin) {
       const adminUser = new User({
         name: 'Admin User',
-        email: 'admin@example.com',
+        email: 'info@offaccess.com',
         password: 'password123',
         role: 'admin',
         status: 'approved',
@@ -454,7 +454,7 @@ const setup = async () => {
     
     console.log('\n✅ Setup completed successfully!');
     console.log('\n📋 Default credentials:');
-    console.log('Admin: admin@example.com / password123');
+          console.log('Admin: info@offaccess.com / password123');
     console.log('Buyer: mmoussallem@mba2025.hbs.edu / password123');
     console.log('\n🌐 Start the application with: npm run dev');
     

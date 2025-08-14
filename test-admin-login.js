@@ -10,7 +10,7 @@ async function testAdminLogin() {
     
     console.log('📡 Testing login API...');
     const response = await axios.post('http://localhost:5000/api/auth/login', {
-      email: 'admin@example.com',
+      email: 'info@offaccess.com',
       password: 'password123'
     });
     
@@ -28,7 +28,7 @@ async function testAdminLogin() {
     
     console.log('\n🎉 Admin login is working correctly!');
     console.log('✅ You can now login with:');
-    console.log('   Email: admin@example.com');
+            console.log('   Email: info@offaccess.com');
     console.log('   Password: password123');
     
   } catch (error) {
