@@ -83,7 +83,7 @@ const Logo = ({
         <img 
           src="/Off Access Icon.png" 
           alt="Off Access Icon" 
-          style={{ ...imageStyles, width: imageStyles.width * 0.35, height: imageStyles.height * 0.35, marginBottom: '-10px' }}
+          style={{ ...imageStyles, width: imageStyles.width * 0.4, height: imageStyles.height * 0.4, marginBottom: '-25px' }}
           onError={(e) => {
             e.target.style.display = 'none';
           }}
