@@ -86,20 +86,31 @@ class FileStorageService {
       const filePath = folder ? `${folder}/${fileName}` : fileName;
       const file = this.bucket.file(filePath);
 
-      // Upload the file
+      // Upload the file with public read access
       await file.save(fileBuffer, {
         metadata: {
           contentType: contentType,
           cacheControl: 'public, max-age=31536000', // 1 year cache
         },
-        public: false, // Keep files private
+        public: true, // Make files publicly readable
       });
 
-      // Generate signed URL for download (valid for 1 hour)
-      const [signedUrl] = await file.getSignedUrl({
-        action: 'read',
-        expires: Date.now() + 60 * 60 * 1000, // 1 hour
-      });
+      // For OAuth2 credentials, we can't generate signed URLs directly
+      // Instead, we'll use a public URL or implement a different approach
+      let downloadUrl = `${this.baseUrl}/${filePath}`;
+      
+      // Try to generate signed URL, but fallback gracefully if it fails
+      let signedUrl = null;
+      try {
+        const [signedUrlResult] = await file.getSignedUrl({
+          action: 'read',
+          expires: Date.now() + 60 * 60 * 1000, // 1 hour
+        });
+        signedUrl = signedUrlResult;
+      } catch (signError) {
+        console.log('⚠️ Could not generate signed URL, using public URL:', signError.message);
+        signedUrl = downloadUrl;
+      }
 
       return {
         success: true,
