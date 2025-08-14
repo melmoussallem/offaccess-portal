@@ -389,7 +389,8 @@ const Login = () => {
                 sx={{
                   color: '#666666',
                   fontSize: '1rem',
-                  lineHeight: 1.4
+                  lineHeight: 1.4,
+                  mb: 2
                 }}
               >
                 Sign in to your account to continue
