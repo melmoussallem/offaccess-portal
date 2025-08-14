@@ -20,7 +20,7 @@ const Logo = ({
       case 'large':
         return { width: 64, height: 64 };
       case 'xlarge':
-        return { width: 182, height: 140 };
+        return { width: 130, height: 70 };
       default:
         return { width: 48, height: 48 };
     }
