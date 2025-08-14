@@ -288,16 +288,35 @@ router.delete('/:brandId/stock-file/:fileId', authenticateToken, requireAdmin, a
     
     // Delete the physical file from Google Cloud Storage
     if (stockFile.filePath) {
+      console.log('🗑️ Attempting to delete file from GCS:', {
+        fileId: fileId,
+        filePath: stockFile.filePath,
+        fileName: stockFile.fileName,
+        originalName: stockFile.originalName
+      });
+      
       try {
         const deleteResult = await fileStorageService.deleteFile(stockFile.filePath);
         if (deleteResult.success) {
-          console.log('✅ File deleted from GCS:', stockFile.filePath);
+          console.log('✅ File deleted from GCS successfully:', stockFile.filePath);
         } else {
-          console.log('⚠️ Could not delete file from GCS:', deleteResult.error);
+          console.error('❌ Failed to delete file from GCS:', {
+            filePath: stockFile.filePath,
+            error: deleteResult.error
+          });
         }
       } catch (deleteError) {
-        console.log('⚠️ Error deleting file from GCS:', deleteError.message);
+        console.error('❌ Exception during GCS file deletion:', {
+          filePath: stockFile.filePath,
+          error: deleteError.message,
+          stack: deleteError.stack
+        });
       }
+    } else {
+      console.warn('⚠️ No filePath found for stockFile:', {
+        fileId: fileId,
+        stockFile: stockFile
+      });
     }
     
     // Delete from database

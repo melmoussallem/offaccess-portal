@@ -253,24 +253,36 @@ class FileStorageService {
    */
   async deleteFile(filePath) {
     try {
+      console.log('🗑️ fileStorageService.deleteFile called with:', filePath);
+      
       const file = this.bucket.file(filePath);
+      console.log('🗑️ Created file reference for bucket:', this.bucket.name);
+      
       const [exists] = await file.exists();
+      console.log('🗑️ File exists check result:', exists);
 
       if (!exists) {
+        console.warn('⚠️ File not found in GCS:', filePath);
         return {
           success: false,
           error: 'File not found'
         };
       }
 
+      console.log('🗑️ Attempting to delete file from GCS...');
       await file.delete();
+      console.log('✅ File deleted successfully from GCS:', filePath);
 
       return {
         success: true,
         message: 'File deleted successfully'
       };
     } catch (error) {
-      console.error('Error deleting file from Google Cloud Storage:', error);
+      console.error('❌ Error deleting file from Google Cloud Storage:', {
+        filePath: filePath,
+        error: error.message,
+        stack: error.stack
+      });
       return {
         success: false,
         error: error.message
