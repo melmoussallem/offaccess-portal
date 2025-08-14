@@ -16,11 +16,35 @@ class FileStorageService {
       console.log('🔍 GOOGLE_APPLICATION_CREDENTIALS_JSON exists:', !!process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
       console.log('🔍 GOOGLE_APPLICATION_CREDENTIALS_JSON length:', process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON ? process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON.length : 0);
       
-      // Since service account key creation is disabled, we'll use OAuth2 credentials
-      console.log('🔑 Service account keys disabled, using OAuth2 credentials...');
-      
-      if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_REFRESH_TOKEN) {
-        console.log('🔑 Using OAuth2 credentials for Google Cloud Storage');
+      // Check for service account credentials first (preferred method)
+      if (process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON) {
+        console.log('🔑 Using Service Account credentials for Google Cloud Storage');
+        
+        try {
+          // Parse the service account JSON
+          const serviceAccountCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
+          
+          // Create a temporary credentials file
+          const tempCredentialsPath = path.join(os.tmpdir(), `gcs-service-account-${Date.now()}.json`);
+          fs.writeFileSync(tempCredentialsPath, JSON.stringify(serviceAccountCredentials, null, 2));
+          
+          console.log('🔑 Created temporary service account credentials file:', tempCredentialsPath);
+          console.log('🔑 Service account email:', serviceAccountCredentials.client_email);
+          
+          // Set the environment variable to point to the temporary file
+          process.env.GOOGLE_APPLICATION_CREDENTIALS = tempCredentialsPath;
+          
+          // Use default configuration which will now read from the file
+          storageConfig = {};
+          
+          console.log('🔑 Service Account authentication configured successfully');
+        } catch (error) {
+          console.error('❌ Failed to parse service account credentials:', error.message);
+          throw new Error('Invalid service account credentials format');
+        }
+      } else if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET && process.env.GOOGLE_REFRESH_TOKEN) {
+        // Fallback to OAuth2 credentials (legacy support)
+        console.log('🔑 Using OAuth2 credentials for Google Cloud Storage (legacy)');
         
         // Create OAuth2 credentials file that Google Cloud Storage can read
         const credentials = {
@@ -40,7 +64,6 @@ class FileStorageService {
         fs.writeFileSync(tempCredentialsPath, JSON.stringify(credentials, null, 2));
         
         console.log('🔑 Created temporary OAuth2 credentials file:', tempCredentialsPath);
-        console.log('🔑 Credentials content preview:', JSON.stringify(credentials, null, 2).substring(0, 200) + '...');
         
         // Set the environment variable to point to the temporary file
         process.env.GOOGLE_APPLICATION_CREDENTIALS = tempCredentialsPath;
@@ -50,12 +73,13 @@ class FileStorageService {
         
         console.log('🔑 OAuth2 authentication configured successfully');
       } else {
-        console.error('❌ OAuth2 credentials not found. Please check your Railway environment variables.');
-        console.log('🔍 Required variables:');
+        console.error('❌ No authentication credentials found. Please set GOOGLE_APPLICATION_CREDENTIALS_JSON or OAuth2 credentials.');
+        console.log('🔍 Available variables:');
+        console.log('  - GOOGLE_APPLICATION_CREDENTIALS_JSON:', !!process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
         console.log('  - GOOGLE_CLIENT_ID:', !!process.env.GOOGLE_CLIENT_ID);
         console.log('  - GOOGLE_CLIENT_SECRET:', !!process.env.GOOGLE_CLIENT_SECRET);
         console.log('  - GOOGLE_REFRESH_TOKEN:', !!process.env.GOOGLE_REFRESH_TOKEN);
-        console.log('⚠️ Using default authentication');
+        throw new Error('No Google Cloud authentication credentials found');
       }
       
       console.log('🔧 Creating Storage instance with config:', Object.keys(storageConfig));
