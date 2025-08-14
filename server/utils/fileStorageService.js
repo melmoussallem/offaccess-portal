@@ -24,18 +24,11 @@ class FileStorageService {
           // Parse the service account JSON
           const serviceAccountCredentials = JSON.parse(process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON);
           
-          // Create a temporary credentials file
-          const tempCredentialsPath = path.join(os.tmpdir(), `gcs-service-account-${Date.now()}.json`);
-          fs.writeFileSync(tempCredentialsPath, JSON.stringify(serviceAccountCredentials, null, 2));
-          
-          console.log('🔑 Created temporary service account credentials file:', tempCredentialsPath);
           console.log('🔑 Service account email:', serviceAccountCredentials.client_email);
+          console.log('🔑 Project ID:', serviceAccountCredentials.project_id);
           
-          // Set the environment variable to point to the temporary file
-          process.env.GOOGLE_APPLICATION_CREDENTIALS = tempCredentialsPath;
-          
-          // Use default configuration which will now read from the file
-          storageConfig = {};
+          // Store credentials for later use in Storage initialization
+          this.serviceAccountCredentials = serviceAccountCredentials;
           
           console.log('🔑 Service Account authentication configured successfully');
         } catch (error) {
@@ -83,7 +76,23 @@ class FileStorageService {
       }
       
       console.log('🔧 Creating Storage instance with config:', Object.keys(storageConfig));
-      this.storage = new Storage(storageConfig);
+      
+      // Initialize Storage with explicit credentials
+      if (this.serviceAccountCredentials) {
+        try {
+          this.storage = new Storage({
+            credentials: this.serviceAccountCredentials,
+            projectId: this.serviceAccountCredentials.project_id
+          });
+          console.log('🔧 Storage initialized with service account credentials');
+        } catch (error) {
+          console.error('❌ Failed to initialize Storage with service account:', error);
+          throw error;
+        }
+      } else {
+        this.storage = new Storage(storageConfig);
+        console.log('🔧 Storage initialized with default config');
+      }
       this.bucketName = process.env.GOOGLE_CLOUD_STORAGE_BUCKET || 'offaccess-portal-files';
       this.bucket = this.storage.bucket(this.bucketName);
       this.baseUrl = `https://storage.googleapis.com/${this.bucketName}`;
