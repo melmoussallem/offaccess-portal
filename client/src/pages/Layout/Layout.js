@@ -212,36 +212,25 @@ const Layout = () => {
             <MenuIcon />
           </IconButton>
           
-          {/* Icon */}
-          <Box sx={{ display: 'flex', alignItems: 'center', mr: 2 }}>
-            <Logo size="small" type="icon" showText={false} />
+          {/* Centered Logo */}
+          <Box sx={{ display: 'flex', alignItems: 'center', flexGrow: 1, justifyContent: 'center' }}>
+            <Logo size="medium" type="icon" showText={false} />
           </Box>
-          
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            {menuItems.find(item => isActive(item.path))?.text || 'Dashboard'}
-          </Typography>
 
           {/* Notifications */}
           <NotificationDropdown />
 
           {/* User Profile Menu */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant="body2" color="text.secondary">
-              {user?.name || user?.email}
-            </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <IconButton
               onClick={handleProfileMenuOpen}
               sx={{ p: 0 }}
             >
-              <Avatar
-                sx={{
-                  width: 32,
-                  height: 32,
-                  bgcolor: user?.role === 'admin' ? 'primary.main' : 'secondary.main'
-                }}
-              >
-                {user?.role === 'admin' ? <Business /> : <Person />}
-              </Avatar>
+              <img 
+                src="/Off Access Icon.png" 
+                alt="Off Access Icon" 
+                style={{ width: 32, height: 32, objectFit: 'contain' }}
+              />
             </IconButton>
           </Box>
 
