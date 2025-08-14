@@ -1073,32 +1073,70 @@ router.delete('/:id', auth, async (req, res) => {
       return res.status(404).json({ error: 'Order not found' });
     }
 
-    // Delete any uploaded files if they exist
-    if (order.excelFile) {
+    // Delete any uploaded files from Google Cloud Storage if they exist
+    if (order.excelFileGCS) {
       try {
-        const filePath = path.join(__dirname, '..', '..', 'uploads', 'orders', order.excelFile);
-        if (fs.existsSync(filePath)) {
-          fs.unlinkSync(filePath);
-          console.log(`Deleted order file: ${order.excelFile}`);
+        console.log('🗑️ Attempting to delete order file from GCS:', {
+          orderId: orderId,
+          filePath: order.excelFileGCS,
+          fileName: order.excelFile,
+          originalName: order.excelFileOriginalName
+        });
+        
+        const deleteResult = await fileStorageService.deleteFile(order.excelFileGCS);
+        if (deleteResult.success) {
+          console.log('✅ Order file deleted from GCS successfully:', order.excelFileGCS);
+        } else {
+          console.error('❌ Failed to delete order file from GCS:', {
+            filePath: order.excelFileGCS,
+            error: deleteResult.error
+          });
         }
-      } catch (fileError) {
-        console.error('Error deleting order file:', fileError);
-        // Continue with deletion even if file deletion fails
+      } catch (deleteError) {
+        console.error('❌ Exception during GCS order file deletion:', {
+          filePath: order.excelFileGCS,
+          error: deleteError.message,
+          stack: deleteError.stack
+        });
       }
+    } else if (order.excelFile) {
+      console.warn('⚠️ No excelFileGCS found for order:', {
+        orderId: orderId,
+        excelFile: order.excelFile
+      });
     }
 
-    // Delete invoice file if it exists
-    if (order.invoiceFile) {
+    // Delete invoice file from Google Cloud Storage if it exists
+    if (order.invoiceFileGCS) {
       try {
-        const invoicePath = path.join(__dirname, '..', '..', 'uploads', 'orders', order.invoiceFile);
-        if (fs.existsSync(invoicePath)) {
-          fs.unlinkSync(invoicePath);
-          console.log(`Deleted invoice file: ${order.invoiceFile}`);
+        console.log('🗑️ Attempting to delete invoice file from GCS:', {
+          orderId: orderId,
+          filePath: order.invoiceFileGCS,
+          fileName: order.invoiceFile,
+          originalName: order.invoiceFileOriginalName
+        });
+        
+        const deleteResult = await fileStorageService.deleteFile(order.invoiceFileGCS);
+        if (deleteResult.success) {
+          console.log('✅ Invoice file deleted from GCS successfully:', order.invoiceFileGCS);
+        } else {
+          console.error('❌ Failed to delete invoice file from GCS:', {
+            filePath: order.invoiceFileGCS,
+            error: deleteResult.error
+          });
         }
-      } catch (fileError) {
-        console.error('Error deleting invoice file:', fileError);
-        // Continue with deletion even if file deletion fails
+      } catch (deleteError) {
+        console.error('❌ Exception during GCS invoice file deletion:', {
+          filePath: order.invoiceFileGCS,
+          error: deleteError.message,
+          stack: deleteError.stack
+        });
       }
+    } else if (order.invoiceFile) {
+      console.warn('⚠️ No invoiceFileGCS found for order:', {
+        orderId: orderId,
+        invoiceFile: order.invoiceFile
+      });
     }
 
     // Delete the order from database
