@@ -84,7 +84,7 @@ const BuyerManagement = () => {
     try {
       setLoading(true);
       const response = await axios.get('/api/buyers');
-      setBuyers(response.data.buyers);
+      setBuyers(response.data.buyers || []);
     } catch (error) {
       console.error('Error fetching buyers:', error);
       toast.error('Failed to load buyers');
@@ -97,7 +97,7 @@ const BuyerManagement = () => {
   const fetchBrands = async () => {
     try {
       const response = await axios.get('/api/brands');
-      setBrands(response.data.brands);
+      setBrands(response.data.brands || []);
     } catch (error) {
       console.error('Error fetching brands:', error);
       toast.error('Failed to load brands');
@@ -111,6 +111,9 @@ const BuyerManagement = () => {
 
   // Filtered and sorted buyers
   const filteredAndSortedBuyers = useMemo(() => {
+    if (!buyers || !Array.isArray(buyers)) {
+      return [];
+    }
     let filtered = buyers;
 
     // Apply search filter
@@ -705,13 +708,13 @@ const BuyerManagement = () => {
                         }
                         return false;
                       });
-                      if (accessibleBrands.length === 0) {
+                      if (!accessibleBrands || accessibleBrands.length === 0) {
                         return <Typography variant="body2">No brands assigned</Typography>;
                       }
                       return (
                         <>
                           <Typography variant="body2" sx={{ mb: 1 }}>
-                            {accessibleBrands.length} brands accessible:
+                            {(accessibleBrands || []).length} brands accessible:
                           </Typography>
                           <ul style={{ margin: 0, paddingLeft: 18, listStyle: 'disc' }}>
                             {accessibleBrands.map((brand, idx) => (
@@ -779,7 +782,7 @@ const BuyerManagement = () => {
               size="small"
               variant="outlined"
               onClick={() => setDialogSelectedBrands(brands.map(b => b._id))}
-              disabled={brands.length === 0}
+              disabled={!brands || brands.length === 0}
             >
               Select All
             </Button>
@@ -787,13 +790,13 @@ const BuyerManagement = () => {
               size="small"
               variant="outlined"
               onClick={() => setDialogSelectedBrands([])}
-              disabled={brands.length === 0}
+              disabled={!brands || brands.length === 0}
             >
               Deselect All
             </Button>
           </Box>
           <FormGroup>
-            {brands.map((brand, idx) => (
+            {(brands || []).map((brand, idx) => (
               <FormControlLabel
                 key={brand._id + '-' + idx}
                 control={
