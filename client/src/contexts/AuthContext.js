@@ -5,12 +5,20 @@ import toast from 'react-hot-toast';
 // Global login tracking to prevent multiple simultaneous attempts
 let loginInProgress = false;
 
-// Configure axios with proper base URL
+// Configure axios with proper base URL and timeout
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
   ? 'https://offaccess-portal-production.up.railway.app' 
   : 'http://localhost:5000';
 console.log('🔍 AuthContext - API_BASE_URL:', API_BASE_URL);
-axios.defaults.baseURL = API_BASE_URL;
+
+// Create a dedicated axios instance for auth requests
+const authApi = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: 30000, // 30 seconds timeout for Railway
+  headers: {
+    'Content-Type': 'application/json'
+  }
+});
 
 const AuthContext = createContext();
 
@@ -36,7 +44,7 @@ export const AuthProvider = ({ children }) => {
       // Call backend logout endpoint if we have a token
       if (token) {
         try {
-          await axios.post('/api/auth/logout');
+          await authApi.post('/api/auth/logout');
         } catch (error) {
           // Don't fail logout if backend call fails
           console.warn('Backend logout failed:', error.message);
@@ -50,8 +58,8 @@ export const AuthProvider = ({ children }) => {
       // Clear localStorage
       localStorage.removeItem('token');
       
-      // Clear axios headers
-      delete axios.defaults.headers.common['Authorization'];
+      // Clear auth API headers
+      delete authApi.defaults.headers.common['Authorization'];
       
       // Show success message
       toast.success('Logged out successfully', {
@@ -95,12 +103,12 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]);
 
-  // Configure axios defaults
+  // Configure auth API defaults
   useEffect(() => {
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      authApi.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     } else {
-      delete axios.defaults.headers.common['Authorization'];
+      delete authApi.defaults.headers.common['Authorization'];
     }
   }, [token]);
 
@@ -109,7 +117,7 @@ export const AuthProvider = ({ children }) => {
     const checkAuth = async () => {
       if (token) {
         try {
-          const response = await axios.get('/api/auth/me');
+          const response = await authApi.get('/api/auth/me');
           setUser(response.data.user);
         } catch (error) {
           console.error('Auth check failed:', error);
@@ -146,7 +154,7 @@ export const AuthProvider = ({ children }) => {
     toast.dismiss('login-error');
     
     try {
-      const response = await axios.post('/api/auth/login', {
+      const response = await authApi.post('/api/auth/login', {
         email,
         password
       });
@@ -158,7 +166,7 @@ export const AuthProvider = ({ children }) => {
         setToken(null);
         setUser(null);
         localStorage.removeItem('token');
-        delete axios.defaults.headers.common['Authorization'];
+        delete authApi.defaults.headers.common['Authorization'];
         toast.error('Your account is not approved yet.', {
           id: 'login-error',
           duration: 2000,
@@ -255,7 +263,7 @@ export const AuthProvider = ({ children }) => {
       console.log('Registration data:', userData);
       
       // Ensure we're sending JSON
-      const response = await axios.post('/api/auth/register', userData, {
+      const response = await authApi.post('/api/auth/register', userData, {
         headers: { 
           'Content-Type': 'application/json'
         }
@@ -295,7 +303,7 @@ export const AuthProvider = ({ children }) => {
   // Update user profile
   const updateProfile = async (profileData) => {
     try {
-      const response = await axios.put('/api/auth/me', profileData);
+      const response = await authApi.put('/api/auth/me', profileData);
       setUser(response.data.user);
       toast.success('Profile updated successfully', {
         style: {
@@ -337,7 +345,7 @@ export const AuthProvider = ({ children }) => {
   // Change password
   const changePassword = async (currentPassword, newPassword) => {
     try {
-      await axios.put('/api/auth/change-password', {
+      await authApi.put('/api/auth/change-password', {
         currentPassword,
         newPassword
       });
@@ -393,7 +401,7 @@ export const AuthProvider = ({ children }) => {
   const forgotPassword = async (email) => {
     try {
       console.log('AuthContext: Sending forgot password request for email:', email);
-      const response = await axios.post('/api/auth/forgot-password', { email });
+      const response = await authApi.post('/api/auth/forgot-password', { email });
       console.log('AuthContext: Forgot password response:', response.data);
       return { success: true, message: response.data.message };
     } catch (error) {
@@ -407,7 +415,7 @@ export const AuthProvider = ({ children }) => {
   // Reset password
   const resetPassword = async (token, newPassword) => {
     try {
-      const response = await axios.post('/api/auth/reset-password', {
+      const response = await authApi.post('/api/auth/reset-password', {
         token,
         newPassword
       });
