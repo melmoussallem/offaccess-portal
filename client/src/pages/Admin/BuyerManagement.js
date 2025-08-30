@@ -47,8 +47,10 @@ import {
 } from '@mui/icons-material';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useAuth } from '../../contexts/AuthContext';
 
 const BuyerManagement = () => {
+  const { user } = useAuth();
   const [buyers, setBuyers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedBuyer, setSelectedBuyer] = useState(null);
@@ -79,6 +81,7 @@ const BuyerManagement = () => {
   const [dialogSelectedBrands, setDialogSelectedBrands] = useState([]);
 
 
+
   // Fetch all buyers
   const fetchBuyers = async () => {
     try {
@@ -87,7 +90,11 @@ const BuyerManagement = () => {
       setBuyers(response.data.buyers || []);
     } catch (error) {
       console.error('Error fetching buyers:', error);
-      toast.error('Failed to load buyers');
+      if (error.response?.status === 401) {
+        toast.error('Please log in as admin to view buyers');
+      } else {
+        toast.error('Failed to load buyers');
+      }
     } finally {
       setLoading(false);
     }

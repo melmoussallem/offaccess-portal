@@ -20,6 +20,10 @@ const authApi = axios.create({
   }
 });
 
+// Configure global axios defaults
+axios.defaults.baseURL = API_BASE_URL;
+axios.defaults.timeout = 30000;
+
 const AuthContext = createContext();
 
 export const useAuth = () => {
@@ -103,12 +107,14 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]);
 
-  // Configure auth API defaults
+  // Configure auth API defaults and global axios
   useEffect(() => {
     if (token) {
       authApi.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     } else {
       delete authApi.defaults.headers.common['Authorization'];
+      delete axios.defaults.headers.common['Authorization'];
     }
   }, [token]);
 
