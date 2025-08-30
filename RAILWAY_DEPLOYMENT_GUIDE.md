@@ -32,9 +32,9 @@ Once deployed, go to your project and:
 ```
 MONGODB_URI=mongodb+srv://melmoussallem:aQI5qbL23FKti3cV@cluster0.gjbkrwp.mongodb.net/digital-wholesale-catalogue?retryWrites=true&w=majority
 JWT_SECRET=c4e636a44a346e72420e576d21bcd4ff6690e2d131d1e0b998fcb71a7e46ff8c
-EMAIL_USER=melmoussallem@gmail.com
+EMAIL_USER=info@offaccess.com
 EMAIL_PASS=wmyj okmb jeon vvbw
-ADMIN_EMAIL=melmoussallem@gmail.com
+ADMIN_EMAIL=info@offaccess.com
 NODE_ENV=production
 FRONTEND_URL=https://portal.offaccess.com
 ```

@@ -27,9 +27,9 @@ MONGODB_URI=mongodb+srv://melmoussallem:aQI5qbL23FKti3cV@cluster0.gjbkrwp.mongod
 JWT_SECRET=c4e636a44a346e72420e576d21bcd4ff6690e2d131d1e0b998fcb71a7e46ff8c
 
 # Email Configuration
-EMAIL_USER=melmoussallem@gmail.com
+EMAIL_USER=info@offaccess.com
 EMAIL_PASS=wmyj okmb jeon vvbw
-ADMIN_EMAIL=melmoussallem@gmail.com
+ADMIN_EMAIL=info@offaccess.com
 
 # Server Configuration
 PORT=5000
@@ -46,9 +46,9 @@ GOOGLE_DRIVE_FOLDER_ID=your-google-drive-folder-id
 // Create Railway environment variables
 const railwayEnv = `MONGODB_URI=mongodb+srv://melmoussallem:aQI5qbL23FKti3cV@cluster0.gjbkrwp.mongodb.net/digital-wholesale-catalogue?retryWrites=true&w=majority
 JWT_SECRET=c4e636a44a346e72420e576d21bcd4ff6690e2d131d1e0b998fcb71a7e46ff8c
-EMAIL_USER=melmoussallem@gmail.com
+EMAIL_USER=info@offaccess.com
 EMAIL_PASS=wmyj okmb jeon vvbw
-ADMIN_EMAIL=melmoussallem@gmail.com
+ADMIN_EMAIL=info@offaccess.com
 NODE_ENV=production
 FRONTEND_URL=https://${domain}`;
 

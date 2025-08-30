@@ -590,82 +590,34 @@ const sendPaymentReminder = async (order) => {
   }
 };
 
-// Password Reset Email Function with retry logic and fallback
+// Password Reset Email Function
 const sendPasswordResetEmail = async (email, userName, resetUrl) => {
-  const maxRetries = 3;
-  let lastError;
+  try {
+    // Call the template directly with the correct parameters
+    const emailContent = emailTemplates.passwordReset(userName, resetUrl);
+    
+    const mailOptions = {
+      from: process.env.ADMIN_EMAIL || process.env.EMAIL_USER,
+      to: email,
+      subject: emailContent.subject,
+      html: emailContent.html
+    };
 
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      // Call the template directly with the correct parameters
-      const emailContent = emailTemplates.passwordReset(userName, resetUrl);
-      
-      const mailOptions = {
-        from: process.env.ADMIN_EMAIL || process.env.EMAIL_USER,
-        to: email,
-        subject: emailContent.subject,
-        html: emailContent.html
-      };
+    console.log('📧 Password reset mail options:', { 
+      from: mailOptions.from, 
+      to: mailOptions.to, 
+      subject: mailOptions.subject,
+      userName,
+      resetUrl
+    });
 
-      console.log(`📧 Password reset mail attempt ${attempt}/${maxRetries}:`, { 
-        from: mailOptions.from, 
-        to: mailOptions.to, 
-        subject: mailOptions.subject,
-        userName,
-        resetUrl
-      });
-
-      const result = await transporter.sendMail(mailOptions);
-      console.log(`✅ Password reset email sent to ${email} on attempt ${attempt}`);
-      return result;
-    } catch (error) {
-      lastError = error;
-      console.error(`❌ Password reset email attempt ${attempt} failed:`, error.message);
-      
-      if (attempt < maxRetries) {
-        console.log(`🔄 Retrying in ${attempt * 2} seconds...`);
-        await new Promise(resolve => setTimeout(resolve, attempt * 2000));
-        
-        // Try recreating transporter for next attempt
-        try {
-          const newTransporter = nodemailer.createTransport(
-            process.env.SMTP_HOST ? {
-              host: process.env.SMTP_HOST,
-              port: process.env.SMTP_PORT || 587,
-              secure: process.env.SMTP_SECURE === 'true',
-              auth: {
-                user: process.env.SMTP_USER || process.env.EMAIL_USER,
-                pass: process.env.SMTP_PASS || process.env.EMAIL_PASS
-              }
-            } : {
-              service: 'gmail',
-              auth: {
-                user: process.env.EMAIL_USER,
-                pass: process.env.EMAIL_PASS
-              }
-            }
-          );
-          Object.assign(transporter, newTransporter);
-        } catch (transporterError) {
-          console.error('Failed to recreate transporter:', transporterError.message);
-        }
-      }
-    }
+    const result = await transporter.sendMail(mailOptions);
+    console.log(`✅ Password reset email sent to ${email}`);
+    return result;
+  } catch (error) {
+    console.error('Password reset email failed:', error);
+    throw error;
   }
-  
-  // Fallback: Log the reset URL for manual use
-  console.error('Password reset email failed after all attempts:', lastError);
-  console.log('🔑 FALLBACK: Password reset URL for manual use:');
-  console.log('📧 Email:', email);
-  console.log('👤 User:', userName);
-  console.log('🔗 Reset URL:', resetUrl);
-  console.log('📋 Copy this URL and send it manually to the user');
-  
-  // Return a mock success response so the frontend doesn't break
-  return {
-    messageId: 'fallback-' + Date.now(),
-    response: 'Email service unavailable, reset URL logged to console'
-  };
 };
 
 // Password Change Confirmation Email Function

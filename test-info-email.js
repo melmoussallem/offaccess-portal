@@ -8,7 +8,7 @@ async function testInfoEmail() {
     service: 'gmail',
     auth: {
       user: 'info@offaccess.com',
-      pass: 'wmyj okmb jeon vvbw' // This is the old password for melmoussallem@gmail.com
+      pass: 'wmyj okmb jeon vvbw' // This is the old password for info@offaccess.com
     }
   });
 

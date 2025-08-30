@@ -17,9 +17,9 @@ if (envExists) {
 
 // Email configuration template
 const emailConfig = `# Email Configuration - Gmail Setup
-EMAIL_USER=melmoussallem@gmail.com
+EMAIL_USER=info@offaccess.com
 EMAIL_PASS=your-gmail-app-password
-ADMIN_EMAIL=melmoussallem@gmail.com`;
+ADMIN_EMAIL=info@offaccess.com`;
 
 console.log('📧 Email Configuration to add to your .env file:');
 console.log('===============================================');
@@ -48,7 +48,7 @@ console.log('7. Replace "your-gmail-app-password" in .env with this password');
 console.log('\n');
 
 console.log('✅ Once configured, all email notifications will be sent from:');
-console.log('   From: melmoussallem@gmail.com');
+console.log('   From: info@offaccess.com');
 console.log('   To: Buyer email addresses');
 console.log('\n');
 

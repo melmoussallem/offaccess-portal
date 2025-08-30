@@ -19,9 +19,9 @@ NODE_ENV=development
 FRONTEND_URL=http://localhost:3000
 
 # Email Configuration - Gmail Setup
-EMAIL_USER=melmoussallem@gmail.com
+EMAIL_USER=info@offaccess.com
 EMAIL_PASS=your-gmail-app-password
-ADMIN_EMAIL=melmoussallem@gmail.com
+ADMIN_EMAIL=info@offaccess.com
 
 # Google Drive Configuration (for inventory management)
 GOOGLE_DRIVE_KEY_FILE=path/to/your/google-drive-key.json
@@ -70,8 +70,8 @@ node test-email-notifications.js
 
 ### Email Flow:
 1. System authenticates with Gmail using `EMAIL_USER` and `EMAIL_PASS`
-2. Emails are sent from `ADMIN_EMAIL` (melmoussallem@gmail.com)
-3. Buyers will see emails coming from melmoussallem@gmail.com
+2. Emails are sent from `ADMIN_EMAIL` (info@offaccess.com)
+3. Buyers will see emails coming from info@offaccess.com
 
 ## Troubleshooting
 
@@ -122,9 +122,9 @@ NODE_ENV=development
 FRONTEND_URL=http://localhost:3000
 
 # Email Configuration - Gmail Setup
-EMAIL_USER=melmoussallem@gmail.com
+EMAIL_USER=info@offaccess.com
 EMAIL_PASS=abcd efgh ijkl mnop
-ADMIN_EMAIL=melmoussallem@gmail.com
+ADMIN_EMAIL=info@offaccess.com
 
 # Google Drive Configuration (for inventory management)
 GOOGLE_DRIVE_KEY_FILE=path/to/your/google-drive-key.json
