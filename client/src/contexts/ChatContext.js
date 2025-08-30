@@ -55,13 +55,14 @@ export const ChatProvider = ({ children }) => {
     try {
       setError(null);
       const response = await axios.get('/api/chat/conversations');
-      setConversations(response.data.conversations);
+      const conversationsData = response.data.conversations || [];
+      setConversations(conversationsData);
       // Count conversations with unread messages for admin
-      const unreadCount = response.data.conversations.filter(c => c.hasUnread).length;
+      const unreadCount = conversationsData.filter(c => c.hasUnread).length;
       setUnreadConversationsCount(unreadCount);
       // --- New logic: Detect new conversations ---
       const prevIds = previousConversationIdsRef.current;
-      const newIds = response.data.conversations.map(c => String(c.buyerId));
+      const newIds = conversationsData.map(c => String(c.buyerId));
       const newConvoAppeared = newIds.some(id => !prevIds.includes(id));
       if (newConvoAppeared) {
         // Optionally, you could trigger a toast or sound here
@@ -83,9 +84,10 @@ export const ChatProvider = ({ children }) => {
     try {
       setError(null);
       const response = await axios.get('/api/chat/my-chat');
-      setCurrentChat(response.data.chat);
-      setMessages(response.data.chat.messages);
-      setUnreadCount(response.data.chat.unreadCount);
+      const chatData = response.data.chat || {};
+      setCurrentChat(chatData);
+      setMessages(chatData.messages || []);
+      setUnreadCount(chatData.unreadCount || 0);
     } catch (error) {
       console.error('Error fetching chat:', error);
       setError('Failed to load chat');
@@ -103,11 +105,12 @@ export const ChatProvider = ({ children }) => {
       const response = await axios.get(`/api/chat/conversation/${buyerId}`);
       // Only update state if this is the latest request
       if (latestRequestRef.current === buyerId) {
-        setCurrentChat(response.data.chat);
-        setMessages(response.data.chat.messages);
-        setUnreadCount(response.data.chat.unreadCount);
-        console.log("Set currentChat:", response.data.chat);
-        console.log("Set messages:", response.data.chat.messages);
+        const chatData = response.data.chat || {};
+        setCurrentChat(chatData);
+        setMessages(chatData.messages || []);
+        setUnreadCount(chatData.unreadCount || 0);
+        console.log("Set currentChat:", chatData);
+        console.log("Set messages:", chatData.messages);
       }
     } catch (error) {
       if (latestRequestRef.current === buyerId) {
@@ -136,7 +139,7 @@ export const ChatProvider = ({ children }) => {
       const response = await axios.post('/api/chat/send-message', payload);
       
       // Add new message to current messages
-      setMessages(prev => [...prev, response.data.message]);
+      setMessages(prev => [...(prev || []), response.data.message]);
       
       // Update conversations list for admin
       if (user?.role === 'admin') {

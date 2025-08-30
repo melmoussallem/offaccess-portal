@@ -402,6 +402,9 @@ const AdminChat = () => {
 
   // Always use conversations for selection logic
   const filteredConversations = useMemo(() => {
+    if (!conversations || !Array.isArray(conversations)) {
+      return [];
+    }
     return conversations.filter(conv =>
       conv.buyerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       conv.buyerEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -482,6 +485,9 @@ const AdminChat = () => {
 
   // Memoize the messages rendering to prevent unnecessary re-renders
   const renderedMessages = useMemo(() => {
+    if (!messages || !Array.isArray(messages)) {
+      return [];
+    }
     return messages.map((msg, index) => {
       const isOwnMessage = msg.senderRole === 'admin';
       const showDate = index === 0 || 
