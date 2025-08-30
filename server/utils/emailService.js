@@ -1,26 +1,47 @@
 const nodemailer = require('nodemailer');
 
-// Logo HTML template
+// Logo HTML for email templates
 const logoHtml = `
-  <div style="text-align: center; margin-bottom: 30px; padding: 20px 0;">
-    <img src="https://portal.offaccess.com/Off Access Black.png" alt="Off Access Logo" style="height: 34px; width: auto; margin-bottom: 0;">
+  <div style="text-align: center; margin-bottom: 20px;">
+    <img src="https://portal.offaccess.com/Off%20Access%20Black.png" alt="Off Access Logo" style="max-width: 200px; height: auto;">
   </div>
 `;
 
-// Create transporter - Updated for info@offaccess.com
-const transporter = nodemailer.createTransport(
-  process.env.SMTP_HOST ? {
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT || 587,
-    secure: process.env.SMTP_SECURE === 'true',
-    auth: {
-      user: process.env.SMTP_USER || process.env.EMAIL_USER,
-      pass: process.env.SMTP_PASS || process.env.EMAIL_PASS
-    },
-    connectionTimeout: 10000, // 10 seconds
-    greetingTimeout: 10000,   // 10 seconds
-    socketTimeout: 10000      // 10 seconds
-  } : {
+// Create email transporter with priority: SendGrid HTTP API > SendGrid SMTP > Gmail SMTP
+const createTransporter = () => {
+  // Priority 1: SendGrid HTTP API (most reliable on Railway)
+  if (process.env.SENDGRID_API_KEY) {
+    console.log('📧 Using SendGrid HTTP API (primary)');
+    return {
+      type: 'sendgrid-http',
+      apiKey: process.env.SENDGRID_API_KEY
+    };
+  }
+  
+  // Priority 2: SendGrid SMTP (more reliable than Gmail on Railway)
+  if (process.env.SENDGRID_SMTP_KEY) {
+    console.log('📧 Using SendGrid SMTP (secondary)');
+    return nodemailer.createTransport({
+      host: 'smtp.sendgrid.net',
+      port: 587,
+      secure: false,
+      requireTLS: true,
+      auth: {
+        user: 'apikey',
+        pass: process.env.SENDGRID_SMTP_KEY
+      },
+      family: 4,
+      connectionTimeout: 30000,
+      greetingTimeout: 30000,
+      socketTimeout: 30000,
+      logger: true,
+      debug: true
+    });
+  }
+  
+  // Priority 3: Gmail SMTP (fallback - may not work on Railway)
+  console.log('📧 Using Gmail SMTP (fallback - may not work on Railway)');
+  return nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 587,
     secure: false,
@@ -29,14 +50,60 @@ const transporter = nodemailer.createTransport(
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS
     },
-    family: 4, // Force IPv4 to avoid IPv6 issues
-    connectionTimeout: 30000, // 30 seconds
-    greetingTimeout: 30000,   // 30 seconds
-    socketTimeout: 30000,     // 30 seconds
-    logger: true, // Enable logging for debugging
-    debug: true   // Enable debug output
+    family: 4,
+    connectionTimeout: 30000,
+    greetingTimeout: 30000,
+    socketTimeout: 30000,
+    logger: true,
+    debug: true
+  });
+};
+
+// SendGrid HTTP API implementation
+const sendGridHttpSend = async (mailOptions) => {
+  const sgMail = require('@sendgrid/mail');
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+  
+  const msg = {
+    to: mailOptions.to,
+    from: mailOptions.from,
+    subject: mailOptions.subject,
+    html: mailOptions.html,
+    text: mailOptions.text
+  };
+  
+  try {
+    const response = await sgMail.send(msg);
+    console.log('✅ SendGrid HTTP API email sent successfully');
+    console.log('📧 Response:', response[0].statusCode);
+    return { success: true, messageId: response[0].headers['x-message-id'] };
+  } catch (error) {
+    console.log('❌ SendGrid HTTP API failed:', error.message);
+    throw error;
   }
-);
+};
+
+// Universal send email function
+const sendEmail = async (mailOptions) => {
+  const transporter = createTransporter();
+  
+  try {
+    // SendGrid HTTP API
+    if (transporter.type === 'sendgrid-http') {
+      return await sendGridHttpSend(mailOptions);
+    }
+    
+    // SMTP (SendGrid or Gmail)
+    const result = await transporter.sendMail(mailOptions);
+    console.log('✅ SMTP email sent successfully');
+    console.log('📧 Message ID:', result.messageId);
+    return { success: true, messageId: result.messageId };
+    
+  } catch (error) {
+    console.log('❌ Email sending failed:', error.message);
+    throw error;
+  }
+};
 
 // Email templates
 const emailTemplates = {
@@ -488,7 +555,7 @@ const emailTemplates = {
 };
 
 // Send email function
-const sendEmail = async (to, template, data) => {
+const sendEmailToUser = async (to, template, data) => {
   try {
     if (!to) {
       throw new Error('No recipient email address provided');
@@ -508,7 +575,7 @@ const sendEmail = async (to, template, data) => {
 
     // Add timeout to the email sending
     const result = await Promise.race([
-      transporter.sendMail(mailOptions),
+      sendEmail(mailOptions),
       new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Email sending timeout after 15 seconds')), 15000)
       )
@@ -525,7 +592,7 @@ const sendEmail = async (to, template, data) => {
 // 1. Registration Completion Notification
 const sendRegistrationConfirmation = async (buyer) => {
   try {
-    await sendEmail(buyer.email, 'registrationConfirmation', buyer);
+    await sendEmailToUser(buyer.email, 'registrationConfirmation', buyer);
     console.log(`Registration confirmation sent to ${buyer.email}`);
   } catch (error) {
     console.error('Registration confirmation failed:', error);
@@ -544,7 +611,7 @@ const sendStatusUpdateEmail = async (buyer, status, reason = null) => {
       reason 
     });
     
-    await sendEmail(buyerObj.email, 'statusUpdate', { ...buyerObj, status, reason });
+    await sendEmailToUser(buyerObj.email, 'statusUpdate', { ...buyerObj, status, reason });
     console.log(`✅ Status update email sent to ${buyerObj.email} - Status: ${status}`);
   } catch (error) {
     console.error('❌ Status update email failed:', error);
@@ -556,7 +623,7 @@ const sendStatusUpdateEmail = async (buyer, status, reason = null) => {
 const sendNewStockFileNotification = async (buyers, stockFile) => {
   try {
     const emailPromises = buyers.map(buyer => 
-      sendEmail(buyer.email, 'newStockFileAvailable', { user: buyer, stockFile })
+      sendEmailToUser(buyer.email, 'newStockFileAvailable', { user: buyer, stockFile })
     );
     
     const results = await Promise.allSettled(emailPromises);
@@ -574,7 +641,7 @@ const sendNewStockFileNotification = async (buyers, stockFile) => {
 // 4. Order Status Change Notification
 const sendOrderStatusUpdate = async (buyer, order) => {
   try {
-    await sendEmail(buyer.email, 'orderStatusUpdate', { user: buyer, order });
+    await sendEmailToUser(buyer.email, 'orderStatusUpdate', { user: buyer, order });
     console.log(`Order status update sent to ${buyer.email} for order ${order.orderNumber || 'Unknown'}`);
   } catch (error) {
     console.error('Order status update failed:', error);
@@ -587,7 +654,7 @@ const sendRegistrationNotification = async (buyer) => {
   try {
     // Send to admin (you can configure admin email in env)
     const adminEmail = process.env.ADMIN_EMAIL || process.env.EMAIL_USER;
-    await sendEmail(adminEmail, 'registrationConfirmation', buyer);
+    await sendEmailToUser(adminEmail, 'registrationConfirmation', buyer);
   } catch (error) {
     console.error('Registration notification failed:', error);
   }
@@ -595,7 +662,7 @@ const sendRegistrationNotification = async (buyer) => {
 
 const sendOrderNotification = async (order, type) => {
   try {
-    await sendEmail(order.buyer.email, type, order);
+    await sendEmailToUser(order.buyer.email, type, order);
   } catch (error) {
     console.error('Order notification failed:', error);
   }
@@ -603,7 +670,7 @@ const sendOrderNotification = async (order, type) => {
 
 const sendPaymentReminder = async (order) => {
   try {
-    await sendEmail(order.buyer.email, 'paymentOverdue', order);
+    await sendEmailToUser(order.buyer.email, 'paymentOverdue', order);
   } catch (error) {
     console.error('Payment reminder failed:', error);
   }
@@ -630,7 +697,7 @@ const sendPasswordResetEmail = async (email, userName, resetUrl) => {
       resetUrl
     });
 
-    const result = await transporter.sendMail(mailOptions);
+    const result = await sendEmail(mailOptions);
     console.log(`✅ Password reset email sent to ${email}`);
     return result;
   } catch (error) {
@@ -655,7 +722,7 @@ const sendPasswordChangeConfirmationEmail = async (email, userName) => {
       subject: mailOptions.subject,
       userName
     });
-    const result = await transporter.sendMail(mailOptions);
+    const result = await sendEmail(mailOptions);
     console.log(`✅ Password change confirmation email sent to ${email}`);
     return result;
   } catch (error) {
@@ -665,7 +732,7 @@ const sendPasswordChangeConfirmationEmail = async (email, userName) => {
 };
 
 module.exports = {
-  sendEmail,
+  sendEmailToUser,
   sendRegistrationConfirmation,
   sendStatusUpdateEmail,
   sendNewStockFileNotification,
