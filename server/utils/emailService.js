@@ -16,13 +16,19 @@ const transporter = nodemailer.createTransport(
     auth: {
       user: process.env.SMTP_USER || process.env.EMAIL_USER,
       pass: process.env.SMTP_PASS || process.env.EMAIL_PASS
-    }
+    },
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 10000,   // 10 seconds
+    socketTimeout: 10000      // 10 seconds
   } : {
     service: 'gmail',
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS
-    }
+    },
+    connectionTimeout: 10000, // 10 seconds
+    greetingTimeout: 10000,   // 10 seconds
+    socketTimeout: 10000      // 10 seconds
   }
 );
 
@@ -494,7 +500,14 @@ const sendEmail = async (to, template, data) => {
 
     console.log('📧 Mail options:', { from: mailOptions.from, to: mailOptions.to, subject: mailOptions.subject });
 
-    const result = await transporter.sendMail(mailOptions);
+    // Add timeout to the email sending
+    const result = await Promise.race([
+      transporter.sendMail(mailOptions),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Email sending timeout after 15 seconds')), 15000)
+      )
+    ]);
+    
     console.log('✅ Email sent successfully:', result.messageId);
     return result;
   } catch (error) {
