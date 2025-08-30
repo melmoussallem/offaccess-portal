@@ -23,7 +23,7 @@ async function testInfoEmail() {
     console.log('📧 Sending test email...');
     const info = await transporter.sendMail({
       from: 'info@offaccess.com',
-      to: 'melmoussallem@gmail.com',
+      to: 'info@offaccess.com',
       subject: 'Test Email from Off Access Portal',
       text: 'This is a test email to verify the info@offaccess.com email service is working.',
       html: '<p>This is a test email to verify the info@offaccess.com email service is working.</p>'

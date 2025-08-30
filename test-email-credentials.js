@@ -7,7 +7,7 @@ async function testEmailCredentials() {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: 'melmoussallem@gmail.com',
+      user: 'info@offaccess.com',
       pass: 'wmyj okmb jeon vvbw'
     }
   });
@@ -22,7 +22,7 @@ async function testEmailCredentials() {
     // Try to send a test email
     console.log('📧 Sending test email...');
     const info = await transporter.sendMail({
-      from: 'melmoussallem@gmail.com',
+      from: 'info@offaccess.com',
       to: 'melmoussallem@gmail.com',
       subject: 'Test Email from Off Access Portal',
       text: 'This is a test email to verify the email service is working.',
