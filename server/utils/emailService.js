@@ -21,14 +21,20 @@ const transporter = nodemailer.createTransport(
     greetingTimeout: 10000,   // 10 seconds
     socketTimeout: 10000      // 10 seconds
   } : {
-    service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false,
+    requireTLS: true,
     auth: {
       user: process.env.EMAIL_USER,
       pass: process.env.EMAIL_PASS
     },
-    connectionTimeout: 10000, // 10 seconds
-    greetingTimeout: 10000,   // 10 seconds
-    socketTimeout: 10000      // 10 seconds
+    family: 4, // Force IPv4 to avoid IPv6 issues
+    connectionTimeout: 30000, // 30 seconds
+    greetingTimeout: 30000,   // 30 seconds
+    socketTimeout: 30000,     // 30 seconds
+    logger: true, // Enable logging for debugging
+    debug: true   // Enable debug output
   }
 );
 
