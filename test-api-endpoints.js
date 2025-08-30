@@ -3,7 +3,7 @@ const axios = require('axios');
 async function testApiEndpoints() {
   console.log('🔍 Testing API Endpoints...\n');
 
-  const baseUrl = 'https://offaccess-portal-production.up.railway.app';
+  const baseUrl = 'https://api.portal.offaccess.com';
   
   // Test dashboard endpoint
   try {

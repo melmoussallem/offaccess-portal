@@ -7,8 +7,8 @@ console.log('Frontend API URL:', apiUrl);
 // Test different possible URLs
 const possibleUrls = [
   'http://localhost:5000',
-  'https://offaccess-portal-production.up.railway.app',
-  'https://api.offaccess.com',
+  'https://api.portal.offaccess.com',
+  'https://api.portal.offaccess.com',
   'https://offaccess-portal.vercel.app',
   'https://your-vercel-domain.vercel.app'
 ];
@@ -21,5 +21,5 @@ possibleUrls.forEach((url, index) => {
 console.log('\n🔧 To fix this:');
 console.log('1. Go to Vercel dashboard');
 console.log('2. Settings → Environment Variables');
-console.log('3. Update REACT_APP_API_URL to: https://offaccess-portal-production.up.railway.app');
+console.log('3. Update REACT_APP_API_URL to: https://api.portal.offaccess.com');
 console.log('4. Redeploy your Vercel project'); 

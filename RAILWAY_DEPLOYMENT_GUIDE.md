@@ -36,7 +36,7 @@ EMAIL_USER=melmoussallem@gmail.com
 EMAIL_PASS=wmyj okmb jeon vvbw
 ADMIN_EMAIL=melmoussallem@gmail.com
 NODE_ENV=production
-FRONTEND_URL=https://offaccess.com
+FRONTEND_URL=https://portal.offaccess.com
 ```
 
 ### **Step 4: Get Your Railway URL**
@@ -56,6 +56,6 @@ If deployment still fails:
 Once Railway deployment is successful:
 1. ✅ Get your Railway backend URL
 2. 🚀 Deploy frontend to Vercel
-3. 🌐 Configure custom domain: `offaccess.com`
+3. 🌐 Configure custom domain: `portal.offaccess.com`
 
 **Let me know your Railway URL when it's deployed!** 🚀 

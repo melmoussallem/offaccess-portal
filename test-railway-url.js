@@ -4,7 +4,7 @@ async function testRailwayURLs() {
   console.log('🔍 Testing possible Railway URLs...\n');
   
   const possibleURLs = [
-    'https://offaccess-portal-production.up.railway.app',
+    'https://api.portal.offaccess.com',
     'https://offaccess-portal.up.railway.app',
     'https://offaccess-portal-production.railway.app',
     'https://offaccess-portal.railway.app'

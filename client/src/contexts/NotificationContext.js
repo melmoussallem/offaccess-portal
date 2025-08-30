@@ -12,11 +12,16 @@ export const useNotifications = () => {
 };
 
 export const NotificationProvider = ({ children }) => {
+  const { user } = useAuth();
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [pagination, setPagination] = useState({ current: 1, total: 1, totalRecords: 0, limit: 20 });
-  const { user } = useAuth();
+  const [pagination, setPagination] = useState({
+    current: 1,
+    total: 1,
+    totalRecords: 0,
+    limit: 20
+  });
 
   // Cleanup function for logout
   const cleanup = useCallback(() => {
@@ -26,13 +31,13 @@ export const NotificationProvider = ({ children }) => {
     setPagination({ current: 1, total: 1, totalRecords: 0, limit: 20 });
   }, []);
 
-  // Fetch notifications (replace or append)
+  // Fetch notifications
   const fetchNotifications = useCallback(async (page = 1, limit = 20, append = false) => {
     if (!user) return;
     try {
       setLoading(true);
       const apiUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://offaccess-portal-production.up.railway.app' 
+        ? 'https://api.portal.offaccess.com' 
         : 'http://localhost:5000';
       console.log('🔍 NotificationContext - API URL:', apiUrl);
       const response = await fetch(`${apiUrl}/api/notifications?page=${page}&limit=${limit}`, {
@@ -69,7 +74,7 @@ export const NotificationProvider = ({ children }) => {
   const markAsRead = async (notificationId) => {
     try {
       const apiUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://offaccess-portal-production.up.railway.app' 
+        ? 'https://api.portal.offaccess.com' 
         : 'http://localhost:5000';
       const response = await fetch(`${apiUrl}/api/notifications/${notificationId}/read`, {
         method: 'PUT',
@@ -98,7 +103,7 @@ export const NotificationProvider = ({ children }) => {
   const markAllAsRead = async () => {
     try {
       const apiUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://offaccess-portal-production.up.railway.app' 
+        ? 'https://api.portal.offaccess.com' 
         : 'http://localhost:5000';
       const response = await fetch(`${apiUrl}/api/notifications/read-all`, {
         method: 'PUT',
@@ -123,7 +128,7 @@ export const NotificationProvider = ({ children }) => {
   const deleteNotification = async (notificationId) => {
     try {
       const apiUrl = process.env.NODE_ENV === 'production' 
-        ? 'https://offaccess-portal-production.up.railway.app' 
+        ? 'https://api.portal.offaccess.com' 
         : 'http://localhost:5000';
       const response = await fetch(`${apiUrl}/api/notifications/${notificationId}`, {
         method: 'DELETE',
@@ -134,12 +139,14 @@ export const NotificationProvider = ({ children }) => {
 
       if (!response.ok) throw new Error('Failed to delete notification');
 
-      // Update local state
+      // Remove from local state
       setNotifications(prev => prev.filter(notification => notification._id !== notificationId));
-      setUnreadCount(prev => {
-        const notification = notifications.find(n => n._id === notificationId);
-        return notification && !notification.isRead ? Math.max(0, prev - 1) : prev;
-      });
+      
+      // Update unread count if notification was unread
+      const deletedNotification = notifications.find(n => n._id === notificationId);
+      if (deletedNotification && !deletedNotification.isRead) {
+        setUnreadCount(prev => Math.max(0, prev - 1));
+      }
     } catch (error) {
       console.error('Error deleting notification:', error);
     }

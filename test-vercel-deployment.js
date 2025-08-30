@@ -19,7 +19,7 @@ async function testVercelDeployment() {
     const html = response.data;
     if (html.includes('localhost:5000')) {
       console.log('❌ Found localhost:5000 in the page - environment variable not being used');
-    } else if (html.includes('offaccess-portal-production.up.railway.app')) {
+    } else if (html.includes('api.portal.offaccess.com')) {
       console.log('✅ Found Railway URL in the page - environment variable is being used');
     } else {
       console.log('⚠️ Could not determine which API URL is being used');

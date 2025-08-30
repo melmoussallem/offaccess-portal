@@ -52,7 +52,7 @@ const emailTemplates = {
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
           <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
           <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-            ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
+            ${process.env.ADMIN_EMAIL || 'info@offaccess.com'}
           </p>
         </div>
       </div>
@@ -87,7 +87,7 @@ const emailTemplates = {
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
               <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
               <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-                ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
+                ${process.env.ADMIN_EMAIL || 'info@offaccess.com'}
               </p>
             </div>
           </div>
@@ -110,7 +110,7 @@ const emailTemplates = {
             <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
               <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
               <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-                ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
+                ${process.env.ADMIN_EMAIL || 'info@offaccess.com'}
               </p>
             </div>
           </div>
@@ -146,7 +146,7 @@ const emailTemplates = {
           <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
             <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
             <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-              ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
+              ${process.env.ADMIN_EMAIL || 'info@offaccess.com'}
             </p>
           </div>
         </div>
@@ -189,7 +189,7 @@ const emailTemplates = {
           <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
             <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
             <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-              ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
+              ${process.env.ADMIN_EMAIL || 'info@offaccess.com'}
             </p>
           </div>
         </div>
@@ -225,7 +225,7 @@ const emailTemplates = {
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
           <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
           <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-            ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
+            ${process.env.ADMIN_EMAIL || 'info@offaccess.com'}
           </p>
         </div>
       </div>
@@ -258,7 +258,7 @@ const emailTemplates = {
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
           <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
           <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-            ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
+            ${process.env.ADMIN_EMAIL || 'info@offaccess.com'}
           </p>
         </div>
       </div>
@@ -290,7 +290,7 @@ const emailTemplates = {
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
           <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
           <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-            ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
+            ${process.env.ADMIN_EMAIL || 'info@offaccess.com'}
           </p>
         </div>
       </div>
@@ -321,7 +321,7 @@ const emailTemplates = {
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
           <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
           <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-            ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
+            ${process.env.ADMIN_EMAIL || 'info@offaccess.com'}
           </p>
         </div>
       </div>
@@ -352,7 +352,7 @@ const emailTemplates = {
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
           <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
           <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-            ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
+            ${process.env.ADMIN_EMAIL || 'info@offaccess.com'}
           </p>
         </div>
       </div>
@@ -383,7 +383,7 @@ const emailTemplates = {
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
           <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
           <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-            ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
+            ${process.env.ADMIN_EMAIL || 'info@offaccess.com'}
           </p>
         </div>
       </div>
@@ -414,7 +414,7 @@ const emailTemplates = {
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
           <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
           <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-            ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
+            ${process.env.ADMIN_EMAIL || 'info@offaccess.com'}
           </p>
         </div>
       </div>
@@ -447,7 +447,7 @@ const emailTemplates = {
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
           <p style="margin: 0; color: #666;">Best regards,<br><strong>Off Access Team</strong></p>
           <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-            ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
+            ${process.env.ADMIN_EMAIL || 'info@offaccess.com'}
           </p>
         </div>
       </div>
@@ -467,7 +467,7 @@ const emailTemplates = {
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0; text-align: center;">
           <p style="margin: 0; color: #666;">Thank you,<br><strong>Off Access Team</strong></p>
           <p style="margin: 5px 0 0 0; color: #666; font-size: 12px;">
-            ${process.env.ADMIN_EMAIL || 'support@offaccess.com'}
+            ${process.env.ADMIN_EMAIL || 'info@offaccess.com'}
           </p>
         </div>
       </div>

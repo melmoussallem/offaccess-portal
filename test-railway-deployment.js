@@ -3,7 +3,7 @@ const axios = require('axios');
 async function testRailwayDeployment() {
   console.log('🔍 Testing Railway Deployment...\n');
 
-  const railwayUrl = 'https://offaccess-portal-production.up.railway.app';
+  const railwayUrl = 'https://api.portal.offaccess.com';
   
   try {
     console.log('📡 Testing health endpoint...');

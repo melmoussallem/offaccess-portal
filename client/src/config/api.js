@@ -1,7 +1,7 @@
 // API Configuration
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://offaccess-portal-production.up.railway.app' 
-  : 'https://offaccess-portal-production.up.railway.app';
+  ? 'https://api.portal.offaccess.com' 
+  : 'http://localhost:5000';
 
 export const getApiUrl = (endpoint) => {
   // Remove leading slash if present
