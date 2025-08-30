@@ -3,12 +3,12 @@ const nodemailer = require('nodemailer');
 async function testInfoEmail() {
   console.log('🔍 Testing info@offaccess.com Email...\n');
 
-  // Test with info@offaccess.com (assuming it's a Gmail account)
+  // Test with info@offaccess.com (using the new app password)
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
       user: 'info@offaccess.com',
-      pass: 'wmyj okmb jeon vvbw' // This is the old password for info@offaccess.com
+      pass: 'opff jtwh uwcx jhmb' // New app password for info@offaccess.com
     }
   });
 

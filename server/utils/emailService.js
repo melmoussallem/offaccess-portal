@@ -7,7 +7,7 @@ const logoHtml = `
   </div>
 `;
 
-// Create transporter
+// Create transporter - Updated for info@offaccess.com
 const transporter = nodemailer.createTransport(
   process.env.SMTP_HOST ? {
     host: process.env.SMTP_HOST,
