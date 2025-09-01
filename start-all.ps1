@@ -1,2 +1,0 @@
-Start-Process powershell -ArgumentList '-NoExit', '-Command', 'cd "'+$PSScriptRoot+'"; npm start'
-Start-Process powershell -ArgumentList '-NoExit', '-Command', 'cd "'+$PSScriptRoot+'\client"; npm start' 
